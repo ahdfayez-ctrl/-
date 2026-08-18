@@ -323,6 +323,12 @@
   </nav>
 
 <script>
+const introBGM = new Audio('The_Sleeping_Grove.mp3');
+introBGM.loop = true;
+introBGM.volume = 0.15;
+document.addEventListener('click', () => {
+  introBGM.play().catch(() => {});
+}, { once: true });
 (function(){
   "use strict";
 
