@@ -1,955 +1,902 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>دفتر حارس التنانين</title>
+<title>أرشيف حارس التنانين السحري | Dragonomicon</title>
+
+<!-- التحميل المسبق للصور الأساسية -->
+<link rel="preload" as="image" href="Egg1.png">
+<link rel="preload" as="image" href="Egg2.png">
+<link rel="preload" as="image" href="Egg3.png">
+
+<!-- الخطوط العربية -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Markazi+Text:wght@400;500;600;700&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Marhey:wght@500;700&family=Readex+Pro:wght@300;500;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+
 <style>
-  :root{
-    --void:#0a1210;
-    --void-deep:#050807;
-    --leather:#182922;
-    --leather-light:#20362c;
-    --leather-edge:#0e1a15;
-    --brass:#c9a227;
-    --brass-bright:#eccb5c;
-    --brass-dim:#7a601c;
-    --ink:#f1e8d0;
-    --ink-dim:#b9ae91;
-    --ink-line:#2a1c10;
-    --ember:#ff7a45;
-    --ember-deep:#d94f1e;
-    --spell:#5eead4;
-    --spell-dim:#2a7d70;
-    --violet:#a78bfa;
-    --lock:#5b5748;
-    --egg-body:#e8d9b5;
-    --egg-speckle:#8a6f45;
+  :root {
+    --bg-void: #0b0e14;
+    --parchment-bg: #131822;
+    --border-gold: #d4a359;
+    --gold-bright: #f3c677;
+    --gold-glow: rgba(243, 198, 119, 0.25);
+    --magic-blue: #3a86ff;
+    --text-primary: #f0e6d2;
+    --text-muted: #9fa8b6;
+    --ruby-alert: #ff4d6d;
+    --magical-flame: #e76f51;
   }
 
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-
-  body{
-    min-height:100vh;
-    background:
-      radial-gradient(ellipse at 50% 0%, #16241d 0%, var(--void) 45%, var(--void-deep) 100%);
-    font-family:'Markazi Text', serif;
-    color:var(--ink);
-    display:flex;
-    align-items:flex-start;
-    justify-content:center;
-    padding:28px 14px 90px;
-    overflow-x:hidden;
-    position:relative;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    min-height: 100vh;
+    background-color: var(--bg-void);
+    background-image: 
+      radial-gradient(circle at 20% 20%, rgba(212, 163, 89, 0.12) 0%, transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(58, 134, 255, 0.1) 0%, transparent 50%);
+    font-family: 'Readex Pro', sans-serif;
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 14px 100px;
+    overflow-x: hidden;
+    position: relative;
   }
 
-  body::before{
-    content:"";
-    position:fixed; inset:0; pointer-events:none; z-index:0;
-    background:
-      radial-gradient(circle at 18% 78%, rgba(94,234,212,0.05) 0%, transparent 38%),
-      radial-gradient(circle at 86% 20%, rgba(201,162,39,0.06) 0%, transparent 35%);
-    animation:driftFog 24s ease-in-out infinite alternate;
-  }
-  @keyframes driftFog{ from{ transform:translateX(-2%);} to{ transform:translateX(2%);} }
-
-  h1,h2,h3{ font-family:'Aref Ruqaa', serif; font-weight:700; margin:0; }
-  .ui-face{ font-family:'Tajawal', sans-serif; }
-
-  button{ font-family:'Tajawal', sans-serif; }
-  button:focus-visible, [tabindex]:focus-visible{ outline:2px solid var(--spell); outline-offset:3px; }
-
-  /* ============ Cinematic intro ============ */
-  .cinema{ position:fixed; inset:0; z-index:40; background:#000; overflow:hidden; transition:opacity 1s ease, transform 1s ease; }
-  .cinema.leaving{ opacity:0; transform:scale(1.05); pointer-events:none; }
-  .cinema-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .7s ease; }
-  .cinema-video.active{ opacity:1; }
-  .cinema-grain{ position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.06; mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
-  .cinema-vignette{ position:absolute; inset:0; z-index:1; pointer-events:none; background:radial-gradient(ellipse at center, transparent 36%, rgba(0,0,0,.68) 100%); }
-  .cinema-kicker{ position:absolute; top:24px; right:26px; z-index:2; font-family:'Tajawal',sans-serif; font-size:12px; letter-spacing:2px; color:var(--brass-bright);
-    background:rgba(0,0,0,.4); border:1px solid rgba(201,162,39,.4); padding:7px 16px; border-radius:3px; }
-  .cinema-skip{ position:absolute; top:22px; left:24px; z-index:2; font-size:13px; color:var(--ink); background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.25); padding:9px 18px; border-radius:3px; cursor:pointer; backdrop-filter:blur(4px); }
-  .cinema-skip:hover{ background:rgba(255,255,255,.16); }
-  .cinema-caption{ position:absolute; z-index:2; bottom:15%; left:8%; max-width:min(80vw,480px);
-    font-family:'Aref Ruqaa', serif; font-weight:700; font-size:clamp(22px,4.2vw,32px); line-height:1.5;
-    color:var(--ink); text-shadow:0 3px 20px rgba(0,0,0,.7); opacity:0; transform:translateY(12px); transition:opacity .7s ease, transform .7s ease; }
-  .cinema-caption.show{ opacity:1; transform:translateY(0); }
-  .cinema-progress{ position:absolute; bottom:24px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:2; }
-  .dash{ position:relative; width:44px; height:3px; border-radius:2px; background:rgba(255,255,255,.22); overflow:hidden; }
-  .dash .fill{ position:absolute; inset:0; width:0%; background:var(--brass-bright); border-radius:2px; }
-  @keyframes dashFill{ from{width:0%;} to{width:100%;} }
-
-  /* ============ ambient forest ============ */
-  .forest-bg{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
-  .tree{ position:absolute; bottom:0; transform-origin:bottom center;
-    clip-path:polygon(50% 0%,65% 22%,55% 22%,72% 42%,58% 42%,76% 64%,60% 64%,63% 100%,37% 100%,40% 64%,24% 64%,42% 42%,28% 42%,45% 22%,35% 22%); }
-  .tree-layer.back .tree{ background:#12211a99; filter:blur(1.5px); }
-  .tree-layer.mid .tree{ background:#0e1c15d9; }
-  .tree-layer.front .tree{ background:#070f0b; }
-  .tree.sway{ animation-name:treeSway; animation-timing-function:ease-in-out; animation-iteration-count:infinite; animation-direction:alternate; }
-  @keyframes treeSway{ from{transform:rotate(-1.1deg);} to{transform:rotate(1.1deg);} }
-  .wisp{ position:absolute; width:4px; height:4px; border-radius:50%; background:var(--spell);
-    box-shadow:0 0 6px 2px var(--spell), 0 0 14px 4px rgba(94,234,212,.3);
-    animation-name:wispFloat, wispFlicker; animation-timing-function:ease-in-out, ease-in-out; animation-iteration-count:infinite, infinite; }
-  @keyframes wispFloat{ 0%{transform:translate(0,0);} 50%{transform:translate(var(--dx),-40px);} 100%{transform:translate(0,0);} }
-  @keyframes wispFlicker{ 0%,100%{opacity:.2;} 50%{opacity:.85;} }
-
-  /* ============ app shell ============ */
-  #appShell{ position:relative; z-index:1; width:100%; max-width:520px; opacity:0; transition:opacity .5s ease; }
-  #appShell.show{ opacity:1; }
-
-  /* ---- ledger (persistent XP + galleons) ---- */
-  .ledger{ display:flex; justify-content:space-between; align-items:center; padding:0 6px; margin-bottom:14px; }
-  .medallion{ display:flex; align-items:center; gap:9px; background:linear-gradient(180deg, var(--leather-light), var(--leather));
-    border:1px solid var(--brass-dim); border-radius:40px; padding:7px 16px 7px 7px; box-shadow:0 6px 16px -8px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.05); }
-  .medallion.coin-side{ flex-direction:row-reverse; padding:7px 7px 7px 16px; }
-  .coin-badge{ width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px;
-    background:radial-gradient(circle at 35% 30%, var(--brass-bright), var(--brass) 60%, var(--brass-dim) 100%);
-    box-shadow:inset 0 1px 2px rgba(255,255,255,.5), 0 2px 4px rgba(0,0,0,.4); }
-  .coin-badge.flip{ animation:coinFlip .6s ease; }
-  @keyframes coinFlip{ from{transform:rotateY(0);} to{transform:rotateY(360deg);} }
-  .ring-badge{ position:relative; width:32px; height:32px; border-radius:50%;
-    background:conic-gradient(var(--spell) calc(var(--p,0)*1%), rgba(255,255,255,.12) 0); display:flex; align-items:center; justify-content:center; }
-  .ring-badge::after{ content:""; position:absolute; inset:3px; border-radius:50%; background:var(--leather-edge); }
-  .ring-badge span{ position:relative; z-index:1; font-size:10px; font-weight:700; color:var(--spell); font-family:'Tajawal',sans-serif; }
-  .medallion .txt{ font-family:'Tajawal',sans-serif; font-size:13px; color:var(--ink-dim); display:flex; flex-direction:column; line-height:1.25; }
-  .medallion .txt b{ color:var(--ink); font-size:15px; }
-  .medallion.pulse{ animation:medPulse .5s ease; }
-  @keyframes medPulse{ 0%{transform:scale(1);} 35%{transform:scale(1.08);} 100%{transform:scale(1);} }
-  .spark{ position:fixed; z-index:5; font-size:12px; pointer-events:none; animation:sparkRise .9s ease-out forwards; }
-  @keyframes sparkRise{ 0%{opacity:.95; transform:translateY(0) scale(1);} 100%{opacity:0; transform:translateY(-38px) scale(.5);} }
-
-  /* ---- grimoire card ---- */
-  .page{ position:relative; background:linear-gradient(160deg, var(--leather-light), var(--leather) 55%, var(--leather-edge));
-    border:1px solid var(--brass-dim); border-radius:8px; padding:38px 26px 30px;
-    box-shadow:0 30px 60px -20px rgba(0,0,0,.65), inset 0 0 60px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
-    opacity:0; transform:translateY(10px); transition:opacity .5s ease, transform .5s ease; }
-  .page.reveal{ opacity:1; transform:translateY(0); }
-  .corner{ position:absolute; width:22px; height:22px; pointer-events:none; }
-  .corner.tl{ top:9px; left:9px; border-top:2px solid var(--brass); border-left:2px solid var(--brass); }
-  .corner.tr{ top:9px; right:9px; border-top:2px solid var(--brass); border-right:2px solid var(--brass); }
-  .corner.bl{ bottom:9px; left:9px; border-bottom:2px solid var(--brass); border-left:2px solid var(--brass); }
-  .corner.br{ bottom:9px; right:9px; border-bottom:2px solid var(--brass); border-right:2px solid var(--brass); }
-
-  .eyebrow{ font-family:'Tajawal',sans-serif; font-size:12px; letter-spacing:3px; color:var(--spell); text-align:center; margin-bottom:8px; }
-  .title{ font-size:clamp(28px,6vw,40px); text-align:center; margin:0 0 14px; color:var(--brass-bright); text-shadow:0 2px 12px rgba(0,0,0,.5); }
-  .divider{ width:70px; height:2px; margin:0 auto 22px; background:linear-gradient(90deg, transparent, var(--brass), transparent); }
-  .story-text{ font-size:19px; line-height:1.9; color:var(--ink-dim); text-align:justify; margin:0 0 26px; }
-
-  /* ---- egg scene ---- */
-  .egg-scene{ display:flex; justify-content:center; margin-bottom:6px; }
-  .nest-wrap{ position:relative; width:210px; }
-  .glow{ position:absolute; left:50%; top:36%; width:150px; height:150px; transform:translate(-50%,-50%);
-    background:radial-gradient(circle, rgba(255,122,69,.5) 0%, rgba(255,122,69,0) 68%); opacity:0; transition:opacity .6s ease; pointer-events:none; filter:blur(2px); }
-  .egg-illustration{ width:100%; display:block; }
-  .egg-body{ fill:var(--egg-body); stroke:var(--ink-line); stroke-width:2.2; transition:filter .6s ease; }
-  .speckle{ fill:var(--egg-speckle); opacity:.6; }
-  .nest-line{ fill:none; stroke:var(--brass-dim); stroke-width:2; stroke-linecap:round; opacity:.7; }
-  .crack{ fill:none; stroke:var(--ink-line); stroke-width:1.7; stroke-linecap:round; stroke-dasharray:60; stroke-dashoffset:60; opacity:0; transition:stroke-dashoffset .9s ease, opacity .3s ease; }
-  .crack.show{ opacity:.9; stroke-dashoffset:0; }
-  .egg-shatter{ animation:eggShake .6s ease-in-out; }
-  @keyframes eggShake{ 0%,100%{transform:translateX(0) rotate(0);} 20%{transform:translateX(-4px) rotate(-2deg);} 40%{transform:translateX(4px) rotate(2deg);} 60%{transform:translateX(-3px) rotate(-1.5deg);} 80%{transform:translateX(3px) rotate(1.5deg);} }
-
-  .warmth-meter{ display:flex; align-items:center; gap:12px; max-width:340px; margin:20px auto 4px; }
-  .meter-label{ font-size:13px; color:var(--ink-dim); white-space:nowrap; font-family:'Tajawal',sans-serif; }
-  .meter-track{ flex:1; height:8px; border-radius:5px; background:rgba(0,0,0,.35); overflow:hidden; box-shadow:inset 0 1px 2px rgba(0,0,0,.4); }
-  .meter-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--ember-deep), var(--ember)); border-radius:5px; transition:width .6s ease; }
-
-  .actions{ text-align:center; margin-top:24px; }
-  .action-row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-  .care-btn{ font-size:15px; color:var(--void-deep); font-weight:700; background:linear-gradient(180deg, var(--brass-bright), var(--brass));
-    border:none; padding:12px 22px; border-radius:30px; cursor:pointer; box-shadow:0 8px 18px -6px rgba(201,162,39,.5); transition:transform .15s ease, opacity .4s ease; }
-  .care-btn[data-kind="sing"]{ background:linear-gradient(180deg, #7fd9c4, var(--spell-dim)); color:var(--void-deep); box-shadow:0 8px 18px -6px rgba(94,234,212,.4); }
-  .care-btn[data-kind="clean"]{ background:linear-gradient(180deg, var(--ember), var(--ember-deep)); color:#fff; box-shadow:0 8px 18px -6px rgba(217,79,30,.5); }
-  .care-btn:hover{ transform:translateY(-2px); }
-  .care-btn:active{ transform:translateY(0) scale(.97); }
-  .care-btn[disabled]{ opacity:.45; cursor:default; transform:none; }
-  .hint{ font-size:15px; color:var(--ink-dim); margin-top:14px; min-height:20px; font-family:'Tajawal',sans-serif; }
-  .care-particle{ position:absolute; font-size:14px; pointer-events:none; animation:emberRise 1s ease-out forwards; }
-  .care-particle.dot{ width:5px; height:5px; border-radius:50%; background:var(--ember); }
-  @keyframes emberRise{ 0%{opacity:.9; transform:translateY(0) scale(1);} 100%{opacity:0; transform:translateY(-70px) scale(.4);} }
-
-  /* ---- dragon room ---- */
-  .dragon-stage{ display:flex; justify-content:center; margin:6px 0 10px; position:relative; }
-  .dragon-stage svg{ width:220px; filter:drop-shadow(0 10px 24px rgba(0,0,0,.5)); }
-  .dragon-name-row{ text-align:center; margin-bottom:6px; }
-  .dragon-name{ font-family:'Aref Ruqaa',serif; font-size:24px; color:var(--brass-bright); }
-  .dragon-species{ font-family:'Tajawal',sans-serif; font-size:13px; color:var(--spell); }
-  .bond-meter{ display:flex; align-items:center; gap:12px; max-width:340px; margin:16px auto; }
-  .bond-fill{ background:linear-gradient(90deg, var(--spell-dim), var(--spell)); }
-  .equipped-badge{ position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:22px;
-    filter:drop-shadow(0 2px 4px rgba(0,0,0,.5)); animation:bob 2.4s ease-in-out infinite; }
-  @keyframes bob{ 0%,100%{transform:translate(-50%,0);} 50%{transform:translate(-50%,-6px);} }
-  .cooldown-note{ font-size:12px; color:var(--ink-dim); font-family:'Tajawal',sans-serif; }
-
-  /* ---- name input ---- */
-  .name-form{ display:flex; gap:8px; justify-content:center; margin:18px 0 6px; flex-wrap:wrap; }
-  .name-input{ font-family:'Tajawal',sans-serif; font-size:15px; padding:11px 16px; border-radius:24px; border:1px solid var(--brass-dim);
-    background:rgba(0,0,0,.25); color:var(--ink); width:200px; text-align:center; }
-  .name-input::placeholder{ color:var(--ink-dim); }
-  .name-input:focus{ outline:none; border-color:var(--spell); }
-
-  /* ---- primary / ghost buttons ---- */
-  .btn-primary{ font-family:'Tajawal',sans-serif; font-size:15px; font-weight:700; color:var(--void-deep);
-    background:linear-gradient(180deg, var(--brass-bright), var(--brass)); border:none; padding:12px 26px; border-radius:30px; cursor:pointer;
-    box-shadow:0 8px 18px -6px rgba(201,162,39,.5); transition:transform .15s ease; }
-  .btn-primary:hover{ transform:translateY(-2px); }
-  .btn-primary[disabled]{ opacity:.4; cursor:default; transform:none; }
-  .btn-ghost{ font-family:'Tajawal',sans-serif; font-size:14px; color:var(--ink-dim); background:transparent; border:1px solid var(--brass-dim);
-    padding:10px 20px; border-radius:30px; cursor:pointer; }
-  .btn-ghost:hover{ color:var(--ink); border-color:var(--brass); }
-
-  /* ---- store ---- */
-  .store-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:6px; }
-  .store-card{ background:rgba(0,0,0,.22); border:1px solid rgba(201,162,39,.25); border-radius:8px; padding:14px 10px; text-align:center; }
-  .store-card .icon{ font-size:30px; display:block; margin-bottom:6px; }
-  .store-card .name{ font-family:'Tajawal',sans-serif; font-size:13px; color:var(--ink); margin-bottom:2px; min-height:32px; display:flex; align-items:center; justify-content:center; }
-  .store-card .price{ font-size:13px; color:var(--brass-bright); font-family:'Tajawal',sans-serif; margin-bottom:8px; }
-  .store-btn{ font-family:'Tajawal',sans-serif; font-size:12px; font-weight:700; border:none; border-radius:20px; padding:7px 14px; cursor:pointer; width:100%; }
-  .store-btn.buy{ background:linear-gradient(180deg, var(--brass-bright), var(--brass)); color:var(--void-deep); }
-  .store-btn.buy[disabled]{ opacity:.35; cursor:default; }
-  .store-btn.owned{ background:rgba(94,234,212,.15); color:var(--spell); border:1px solid var(--spell-dim); }
-  .store-btn.equipped{ background:rgba(94,234,212,.35); color:var(--void-deep); }
-
-  /* ---- collection ---- */
-  .collection-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:6px; }
-  .medal{ background:rgba(0,0,0,.22); border:1px solid rgba(201,162,39,.25); border-radius:8px; padding:10px 6px; text-align:center; cursor:pointer; transition:transform .15s ease; }
-  .medal:hover{ transform:translateY(-2px); }
-  .medal svg{ width:100%; max-width:66px; }
-  .medal .mname{ font-family:'Tajawal',sans-serif; font-size:11px; color:var(--ink-dim); margin-top:4px; line-height:1.3; }
-  .medal.locked{ opacity:.55; }
-  .medal.locked .mname{ color:var(--lock); }
-  .lock-icon{ font-size:20px; }
-  .collection-detail{ margin-top:16px; background:rgba(0,0,0,.25); border:1px solid var(--brass-dim); border-radius:8px; padding:14px 16px; display:none; }
-  .collection-detail.show{ display:block; }
-  .collection-detail h3{ color:var(--brass-bright); font-size:20px; margin-bottom:4px; }
-  .collection-detail .tag{ font-family:'Tajawal',sans-serif; font-size:12px; color:var(--spell); margin-bottom:8px; }
-  .collection-detail p{ font-size:16px; color:var(--ink-dim); line-height:1.7; margin:0; }
-
-  /* ---- chapter 2 teaser ---- */
-  .seal{ width:96px; height:96px; margin:6px auto 18px; border-radius:50%;
-    background:radial-gradient(circle at 35% 30%, #b23a1a, var(--ember-deep) 55%, #7a2810 100%);
-    display:flex; align-items:center; justify-content:center; font-size:34px; box-shadow:0 10px 24px -8px rgba(0,0,0,.6), inset 0 2px 4px rgba(255,255,255,.15); }
-  .progress-toward{ max-width:300px; margin:18px auto 4px; }
-  .progress-toward .meter-track{ height:7px; }
-  .progress-toward .meter-fill{ background:linear-gradient(90deg, var(--violet), var(--spell)); }
-
-  /* ---- bottom nav ---- */
-  #bottomNav{ position:fixed; bottom:0; left:0; right:0; z-index:20; display:none; gap:2px; justify-content:center;
-    background:linear-gradient(0deg, var(--void-deep) 70%, transparent); padding:14px 10px 16px; }
-  #bottomNav.show{ display:flex; }
-  .nav-btn{ font-family:'Tajawal',sans-serif; background:transparent; border:none; color:var(--ink-dim); font-size:11px;
-    display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 14px; cursor:pointer; border-radius:10px; }
-  .nav-btn .ic{ font-size:19px; }
-  .nav-btn.active{ color:var(--brass-bright); }
-  .nav-btn.active .ic{ filter:drop-shadow(0 0 6px rgba(201,162,39,.6)); }
-
-  @media (prefers-reduced-motion: reduce){
-    .page, body::before, .care-particle, .spark, .tree.sway, .wisp, .dash .fill, .medallion.pulse, .coin-badge.flip, .egg-shatter, .equipped-badge{
-      animation:none !important;
-    }
-    .page{ opacity:1 !important; transform:none !important; }
+  .svg-icon {
+    width: 20px; height: 20px; fill: currentColor; display: inline-block; vertical-align: middle;
   }
 
-  @media (max-width:480px){
-    .page{ padding:32px 18px 26px; }
-    .collection-grid{ grid-template-columns:1fr 1fr; }
+  /* Cinema Intro */
+  .cinema {
+    position: fixed; inset: 0; z-index: 100; background: #000; overflow: hidden;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .cinema.leaving { opacity: 0; transform: scale(1.05); pointer-events: none; }
+  .cinema-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.6s ease; }
+  .cinema-video.active { opacity: 1; }
+  .cinema-overlay {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.9) 100%);
+  }
+  .cinema-badge {
+    position: absolute; top: 24px; right: 24px; z-index: 2; font-family: 'Cinzel', serif; font-size: 11px;
+    letter-spacing: 3px; color: var(--gold-bright); background: rgba(19, 24, 34, 0.9); border: 1px solid var(--border-gold);
+    padding: 8px 16px; border-radius: 20px; backdrop-filter: blur(8px);
+  }
+  .cinema-skip {
+    position: absolute; top: 24px; left: 24px; z-index: 2; font-family: 'Marhey', cursive; font-size: 13px; color: var(--text-primary);
+    background: rgba(255,255,255,0.08); border: 1px solid var(--border-gold); padding: 8px 20px;
+    border-radius: 20px; cursor: pointer; backdrop-filter: blur(8px); transition: all 0.3s ease;
+  }
+  .cinema-skip:hover { background: var(--border-gold); color: #000; transform: scale(1.05); }
+  .cinema-caption {
+    position: absolute; z-index: 2; bottom: 12%; right: 8%; left: 8%; text-align: center;
+    font-family: 'Aref Ruqaa', serif; font-size: clamp(22px, 5vw, 32px); color: var(--gold-bright);
+    text-shadow: 0 4px 25px rgba(0,0,0,0.95); opacity: 0; transform: translateY(12px); transition: all 0.6s ease;
+  }
+  .cinema-caption.show { opacity: 1; transform: translateY(0); }
+
+  /* Main Shell */
+  #appShell {
+    position: relative; z-index: 1; width: 100%; max-width: 580px; opacity: 0; transition: opacity 0.6s ease;
+  }
+  #appShell.show { opacity: 1; }
+
+  /* Top Stat Medallions */
+  .ledger-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .medallion {
+    display: flex; align-items: center; gap: 10px; background: rgba(19, 24, 34, 0.9);
+    border: 1.5px solid var(--border-gold); padding: 10px 18px;
+    border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 0 10px var(--gold-glow); backdrop-filter: blur(12px);
+  }
+  .medallion-icon { color: var(--gold-bright); display: flex; align-items: center; }
+  .medallion-info { display: flex; flex-direction: column; line-height: 1.2; font-size: 11px; color: var(--text-muted); }
+  .medallion-info b { font-size: 16px; color: var(--gold-bright); font-family: 'Cinzel', serif; }
+
+  /* Card Container */
+  .grimoire-card {
+    position: relative; background: var(--parchment-bg);
+    border: 2px solid var(--border-gold);
+    border-radius: 255px 25px 225px 25px/25px 225px 25px 255px;
+    padding: 36px 28px 28px; backdrop-filter: blur(16px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 20px var(--gold-glow), inset 0 0 40px rgba(0,0,0,0.8);
+    opacity: 0; transform: translateY(16px); transition: all 0.5s ease;
+  }
+  .grimoire-card.reveal { opacity: 1; transform: translateY(0); }
+
+  .corner-ornament { position: absolute; width: 22px; height: 22px; pointer-events: none; border: 2px solid var(--border-gold); }
+  .corner-ornament.tl { top: 12px; left: 12px; border-right: 0; border-bottom: 0; border-radius: 6px 0 0 0; }
+  .corner-ornament.tr { top: 12px; right: 12px; border-left: 0; border-bottom: 0; border-radius: 0 6px 0 0; }
+  .corner-ornament.bl { bottom: 12px; left: 12px; border-right: 0; border-top: 0; border-radius: 0 0 0 6px; }
+  .corner-ornament.br { bottom: 12px; right: 12px; border-left: 0; border-top: 0; border-radius: 0 0 6px 0; }
+
+  .card-kicker { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 3px; color: var(--magic-blue); text-align: center; text-transform: uppercase; }
+  
+  .card-title {
+    font-family: 'Aref Ruqaa', serif; font-weight: 700; font-size: clamp(28px, 6vw, 38px);
+    text-align: center; margin: 8px 0 12px;
+    background: linear-gradient(45deg, var(--gold-bright), var(--magical-flame));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+  }
+  
+  .card-divider { width: 120px; height: 2px; background: linear-gradient(90deg, transparent, var(--border-gold), transparent); margin: 0 auto 22px; }
+  
+  .narrative-p { font-size: 15px; line-height: 1.9; color: var(--text-primary); text-align: justify; margin-bottom: 20px; font-weight: 300; }
+
+  /* Frame & Dragon Image Adjustments */
+  .dragon-display-frame {
+    width: 100%; height: 240px; position: relative; display: flex;
+    justify-content: center; align-items: center; margin: 16px 0; border-radius: 16px;
+    background: radial-gradient(circle at center, rgba(243, 198, 119, 0.08) 0%, transparent 75%);
+    overflow: hidden;
+  }
+  
+  /* أنيميشن تحويل وتغيير الصورة بشكل سلس */
+  .dragon-display-frame img.main-dragon-img {
+    max-height: 100%; max-width: 100%; object-fit: contain;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .dragon-display-frame img.main-dragon-img.img-changing {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  /* تأثيرات الحركة أثناء اللعب والنوم */
+  .action-anim { animation: pulseAction 0.4s infinite alternate; }
+  .sleep-anim { animation: sleepWiggle 1.5s infinite ease-in-out; filter: grayscale(0.4) brightness(0.8) !important; }
+
+  @keyframes pulseAction {
+    0% { transform: scale(1) rotate(0deg); }
+    100% { transform: scale(1.1) rotate(-3deg); }
+  }
+
+  @keyframes sleepWiggle {
+    0%, 100% { transform: translateY(0) scale(0.98); }
+    50% { transform: translateY(5px) scale(1); }
+  }
+
+  .equipped-badge {
+    position: absolute; top: 10px; right: 10px; z-index: 10;
+    background: rgba(19, 24, 34, 0.85); border: 1px solid var(--border-gold);
+    border-radius: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 10px var(--gold-glow);
+  }
+  .equipped-badge img { width: 26px; height: 26px; object-fit: contain; }
+  .equipped-badge span { font-family: 'Marhey', cursive; font-size: 11px; color: var(--gold-bright); }
+
+  /* Progress & Meters */
+  .meter-box { margin: 18px 0; }
+  .meter-head { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-family: 'Marhey', cursive; }
+  .meter-track { height: 10px; background: rgba(0,0,0,0.7); border-radius: 20px; overflow: hidden; border: 1px solid var(--border-gold); padding: 1.5px; }
+  .meter-fill { height: 100%; width: 0%; border-radius: 20px; background: linear-gradient(90deg, var(--magical-flame), var(--gold-bright)); transition: width 0.4s ease; }
+  .meter-fill.bond { background: linear-gradient(90deg, var(--magic-blue), var(--gold-bright)); }
+
+  /* Action Buttons */
+  .action-grid { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+  .btn-action {
+    background: rgba(19, 24, 34, 0.9); border: 1.5px solid var(--border-gold); color: var(--gold-bright);
+    padding: 10px 20px; border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+    font-family: 'Marhey', cursive; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  }
+  .btn-action:hover:not([disabled]) {
+    background: var(--border-gold); color: #000; transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 8px 20px var(--gold-glow);
+  }
+  .btn-action[disabled] { opacity: 0.35; cursor: not-allowed; border-color: var(--text-muted); color: var(--text-muted); }
+
+  .status-hint { font-family: 'Marhey', cursive; font-size: 13px; color: var(--gold-bright); text-align: center; margin-top: 14px; min-height: 22px; }
+  .timer-counter { color: var(--ruby-alert); font-weight: 700; font-size: 14px; text-align: center; margin-top: 6px; font-family: 'Marhey', cursive; }
+
+  .input-group { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+  .luxury-input {
+    background: rgba(0,0,0,0.6); border: 1.5px solid var(--border-gold); color: var(--gold-bright);
+    padding: 10px 18px; border-radius: 12px; text-align: center; font-size: 16px; outline: none; width: 240px;
+    font-family: 'Aref Ruqaa', serif;
+  }
+  .luxury-input:focus { border-color: var(--gold-bright); box-shadow: 0 0 15px var(--gold-glow); }
+
+  /* Store & Collection Grids */
+  .catalog-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .catalog-item {
+    background: rgba(0,0,0,0.45); border: 1px solid rgba(212, 163, 89, 0.3);
+    border-radius: 15px 5px 15px 5px; padding: 12px; text-align: center; transition: all 0.3s ease;
+  }
+  .catalog-item:hover { border-color: var(--border-gold); transform: translateY(-2px); }
+  .catalog-item img { height: 48px; object-fit: contain; margin-bottom: 6px; }
+  .catalog-item .item-title { font-family: 'Marhey', cursive; font-size: 13px; color: var(--text-primary); margin-bottom: 2px; }
+  .catalog-item .item-cost { font-size: 11px; color: var(--gold-bright); font-family: 'Cinzel', serif; margin-bottom: 8px; }
+  
+  .btn-store {
+    width: 100%; padding: 6px 0; border: 1px solid var(--border-gold); background: transparent;
+    color: var(--gold-bright); font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'Marhey', cursive;
+    border-radius: 8px;
+  }
+  .btn-store:hover:not([disabled]) { background: var(--border-gold); color: #000; }
+  .btn-store.equipped { background: var(--magic-blue); border-color: var(--magic-blue); color: #fff; }
+
+  .archive-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+  .archive-card {
+    background: rgba(0,0,0,0.45); border: 1px solid rgba(212, 163, 89, 0.25); border-radius: 10px; padding: 10px;
+    text-align: center; cursor: pointer; transition: all 0.3s;
+  }
+  .archive-card:hover { border-color: var(--border-gold); transform: translateY(-4px) rotate(-1deg); }
+  .archive-card img { width: 100%; height: 55px; object-fit: contain; }
+  .archive-card .label { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-family: 'Marhey', cursive; }
+  .archive-card.locked { opacity: 0.3; filter: grayscale(1); }
+
+  .archive-details-box {
+    margin-top: 16px; background: rgba(0,0,0,0.7); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 16px; display: none;
+  }
+  .archive-details-box.show { display: block; }
+  .archive-details-box h3 { color: var(--gold-bright); font-size: 20px; font-family: 'Aref Ruqaa', serif; margin-bottom: 4px; }
+  .archive-details-box .sub-title { font-size: 12px; color: var(--magic-blue); font-family: 'Cinzel', serif; margin-bottom: 8px; }
+
+  /* Bottom Navigation Bar */
+  #bottomNav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; display: none; justify-content: center; gap: 10px;
+    background: linear-gradient(180deg, transparent, rgba(11, 14, 20, 0.98) 35%); padding: 16px 10px 20px; backdrop-filter: blur(12px);
+  }
+  #bottomNav.show { display: flex; }
+  .nav-item {
+    background: rgba(19, 24, 34, 0.9); border: 1px solid rgba(212, 163, 89, 0.3); color: var(--text-muted);
+    padding: 8px 18px; border-radius: 20px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    transition: all 0.25s ease; font-family: 'Marhey', cursive;
+  }
+  .nav-item:hover, .nav-item.active { border-color: var(--border-gold); color: var(--gold-bright); background: rgba(212, 163, 89, 0.15); transform: translateY(-2px); }
+
+  @media (max-width: 480px) {
+    .grimoire-card { padding: 26px 16px 20px; }
+    .catalog-grid, .archive-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
 <body>
 
+  <!-- Cinema Intro Window -->
   <div class="cinema" id="cinema">
     <video class="cinema-video active" id="vid1" src="video1.mp4" muted playsinline preload="auto"></video>
     <video class="cinema-video" id="vid2" src="video2.mp4" muted playsinline preload="auto"></video>
     <video class="cinema-video" id="vid3" src="video3.mp4" muted playsinline preload="auto"></video>
-    <div class="cinema-grain"></div>
-    <div class="cinema-vignette"></div>
-    <div class="cinema-kicker">الفصل الأول</div>
-    <button class="cinema-skip" id="skipBtn">تخطي ↷</button>
+    <div class="cinema-overlay"></div>
+    <div class="cinema-badge">CHAPTER I &middot; FORBIDDEN FORESTS</div>
+    <button class="cinema-skip" id="skipBtn">تخطي العرض ✨</button>
     <div class="cinema-caption" id="cinemaCaption"></div>
-    <div class="cinema-progress">
-      <span class="dash"><span class="fill" id="dashFill0"></span></span>
-      <span class="dash"><span class="fill" id="dashFill1"></span></span>
-      <span class="dash"><span class="fill" id="dashFill2"></span></span>
-    </div>
   </div>
 
-  <div class="forest-bg" aria-hidden="true">
-    <div class="tree-layer back" id="treesBack"></div>
-    <div class="tree-layer mid" id="treesMid"></div>
-    <div id="wisps"></div>
-    <div class="tree-layer front" id="treesFront"></div>
-  </div>
-
+  <!-- Main App Container -->
   <div id="appShell">
-    <div class="ledger" id="ledger">
-      <div class="medallion coin-side">
-        <span class="coin-badge" id="coinIcon">🪙</span>
-        <span class="txt"><span>غاليونات</span><b id="coinVal">0</b></span>
+    <div class="ledger-bar" id="ledgerBar">
+      <div class="medallion">
+        <span class="medallion-icon">
+          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
+        </span>
+        <div class="medallion-info"><span>غاليونات سحرية</span><b id="coinVal">0</b></div>
       </div>
-      <div class="medallion" id="xpMedallion">
-        <span class="ring-badge" id="ringBadge"><span id="ringLv">1</span></span>
-        <span class="txt"><span>المستوى</span><b id="xpVal">0 XP</b></span>
+      <div class="medallion">
+        <span class="medallion-icon">
+          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        </span>
+        <div class="medallion-info"><span>مستوى الحارس</span><b id="xpVal">LVL 1</b></div>
       </div>
     </div>
 
-    <main class="page" id="pageCard">
-      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
-      <div id="screenContent"></div>
+    <main class="grimoire-card" id="mainCard">
+      <span class="corner-ornament tl"></span>
+      <span class="corner-ornament tr"></span>
+      <span class="corner-ornament bl"></span>
+      <span class="corner-ornament br"></span>
+      <div id="screenView"></div>
     </main>
   </div>
 
-  <nav id="bottomNav" class="ui-face">
-    <button class="nav-btn" data-nav="dragon"><span class="ic">🐉</span>التنين</button>
-    <button class="nav-btn" data-nav="store"><span class="ic">🛍️</span>المتجر</button>
-    <button class="nav-btn" data-nav="collection"><span class="ic">📖</span>السجل</button>
-    <button class="nav-btn" data-nav="chapter2"><span class="ic">🔥</span>الفصل ٢</button>
+  <!-- Bottom Navigation Bar -->
+  <nav id="bottomNav">
+    <button class="nav-item" data-target="dragon">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2L2 19h20L12 2zm0 3.8L18.8 17H5.2L12 5.8z"/></svg>
+      التنين
+    </button>
+    <button class="nav-item" data-target="store">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3z"/></svg>
+      السوق
+    </button>
+    <button class="nav-item" data-target="collection">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h2v8l2.5-1.5L13 12V4h5v16z"/></svg>
+      السجل
+    </button>
+    <button class="nav-item" data-target="chapter2">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z M5 13.18v4l7 3.82 7-3.82v-4L12 17l-7-3.82z"/></svg>
+      الفصل التالي
+    </button>
   </nav>
 
 <script>
 (function(){
   "use strict";
 
-  /* ============================================================
-     DATA
-  ============================================================ */
-  const STORAGE_KEY = 'dragonKeeperSave_v2';
-  const MAX_WARMTH = 8;
-  const XP_PER_LEVEL = 50;
-  const CARE_COOLDOWN_MS = 12000;
+  const SAVE_KEY = 'dragonKeeperSave_v9';
+  const MAX_EGG_WARMTH = 9;
+  const XP_LEVEL_STEP = 50;
 
-  const SPECIES = [
-    { id:'ember',  name:'تنين اللهب الذهبي',  title:'حارس النار القديمة',
-      colors:{scale:'#ff8a5c', scaleDark:'#c2451a', belly:'#ffd699', horn:'#3b2a1c'},
-      desc:'وُلِد من جمرٍ لم ينطفئ منذ قرون، ونَفَسه يكفي ليُدفّئ أبرد ليالي الغابة.' },
-    { id:'mist',   name:'تنين الضباب الفضي',  title:'صائد الغيوم',
-      colors:{scale:'#a9c2d1', scaleDark:'#5b7688', belly:'#eaf3f6', horn:'#2c3e46'},
-      desc:'يظهر ويختفي بين الضباب كأنه جزء منه، ولا يراه بوضوح إلا من يستحق ثقته.' },
-    { id:'forest', name:'تنين الأوراق الزمردية', title:'حارس الأشجار العجوز',
-      colors:{scale:'#57b378', scaleDark:'#256b3f', belly:'#cdeac4', horn:'#3d2b1a'},
-      desc:'جلده يتلوّن مع فصول السنة، وتنبت فوق ظهره أوراق صغيرة من غابته الأم.' },
-    { id:'night',  name:'تنين الليل البنفسجي', title:'سالك الأحلام',
-      colors:{scale:'#9b81e0', scaleDark:'#4f3a8a', belly:'#e0d3f7', horn:'#241a3d'},
-      desc:'لا يستيقظ إلا مع الظلام، وعيناه تلمعان بضوءٍ يشبه النجوم المسروقة.' },
-    { id:'desert', name:'تنين الرمال البرونزية', title:'ملك الكثبان',
-      colors:{scale:'#d9b13e', scaleDark:'#8a6f1e', belly:'#f6e2a0', horn:'#4a3418'},
-      desc:'قشوره صلبة كالنحاس القديم، ويتحمّل من حرارة الشمس ما لا يطيقه غيره.' },
-    { id:'storm',  name:'تنين العاصفة الفولاذية', title:'راكب الرعد',
-      colors:{scale:'#7fa0c2', scaleDark:'#3d5670', belly:'#dbe9f5', horn:'#1f2937'},
-      desc:'صوت زئيره أول ما يُسمَع قبل كل عاصفة كبرى تجتاح الغابة الممنوعة.' }
+  const SPECIES_DATABASE = [
+    { 
+      id: 'horntail',  
+      name: 'القرن المجرى الأملس', 
+      english: 'Hungarian Horntail',
+      images: { baby: 'Horntail-baby.png', teen: 'Horntail-teen.png', adult: 'Horntail-adult.png' },
+      desc: 'أخطر وأشرس أنواع التنانين؛ يمتلك قشورًا سوداء، وعيونًا صفراء، وأشواكًا برونزية على طول ذيله الحاد.' 
+    },
+    { 
+      id: 'ironbelly',  
+      name: 'الحديدى الأوكراني', 
+      english: 'Ukrainian Ironbelly',
+      images: { baby: 'Ukrainian-baby.png', teen: 'Ukrainian-teen.png', adult: 'Ukrainian-adult.png' },
+      desc: 'أضخم سلالات التنانين المسجلة، بوزن يصل إلى 6 أطنان وقشور معدنية رمادية سميكة كالصلب.' 
+    },
+    { 
+      id: 'ridgeback',   
+      name: 'النرويجي ذو العرف المحدب',  
+      english: 'Norwegian Ridgeback',
+      images: { baby: 'Norwegian-baby.png', teen: 'Norwegian-teen.png', adult: 'Norwegian-adult.png' },
+      desc: 'يشبه التنين "نوربرت"، يمتلك بروزات بارزة داكنة على طول ظهره ويبدأ بإطلاق النار في سن مبكرة.' 
+    },
+    { 
+      id: 'fireball', 
+      name: 'الكرة النارية الصينية', 
+      english: 'Chinese Fireball',
+      images: { baby: 'Chinese-baby.png', teen: 'Chinese-teen.png', adult: 'Chinese-adult.png' },
+      desc: 'تنين أحمر ناعم القشور وتحيط بوجهه شوك ذهبية، ويطلق كرات نارية كروية الشكل من منخريه.' 
+    },
+    { 
+      id: 'shortsnout',  
+      name: 'السويدي ذو الخرطوم القصير', 
+      english: 'Swedish Short-Snout',
+      images: { baby: 'Swedish-baby.png', teen: 'Swedish-teen.png', adult: 'Swedish-adult.png' },
+      desc: 'تنين أزرق فضي يعيش في الجبال المرتفعة، يطلق لهبًا أزرق شديد الحرارة يذيب الصخور.' 
+    },
+    { 
+      id: 'welshgreen',  
+      name: 'الأخضر الويلزي الشائع',  
+      english: 'Common Welsh Green',
+      images: { baby: 'Welsh-baby.png', teen: 'Welsh-teen.png', adult: 'Welsh-adult.png' },
+      desc: 'من أقل التنانين إثارة للمشاكل؛ يتغذى على الأغنام، وله زئير رنان ناعم الموسيقى.' 
+    }
   ];
 
-  const ITEMS = [
-    { id:'meat',    name:'لحم مدخّن',        icon:'🍖', price:8,  type:'food' },
-    { id:'crystal', name:'بلورة طاقة',        icon:'💎', price:15, type:'food' },
-    { id:'collar',  name:'طوق نحاسي منقوش',   icon:'📿', price:30, type:'accessory' },
-    { id:'saddle',  name:'سرج جلدي قديم',     icon:'🎒', price:45, type:'accessory' },
-    { id:'crown',   name:'تاج الحرّاس الصغير', icon:'👑', price:60, type:'accessory' },
-    { id:'scarf',   name:'وشاح صوفي دافئ',    icon:'🧣', price:20, type:'accessory' }
+  const EGG_STAGES_IMAGES = ['Egg1.png', 'Egg2.png', 'Egg3.png'];
+
+  const STORE_ITEMS = [
+    { id: 'meat',    name: 'لحم مدخن',       img: 'Meat.png',   price: 8,  type: 'food' },
+    { id: 'crystal', name: 'بلورة طاقة',       img: 'Energy.png', price: 15, type: 'food' },
+    { id: 'collar',  name: 'طوق سحري',       img: 'Collar.png', price: 30, type: 'accessory' },
+    { id: 'saddle',  name: 'سرج حارس',       img: 'Pack.png',   price: 45, type: 'accessory' },
+    { id: 'crown',   name: 'تاج الإمبراطور',    img: 'Crown.png',  price: 60, type: 'accessory' }
   ];
 
-  const HINTS = [
-    'البيضة لسه باردة... جرّبي تدفّيها بإيدك',
-    'في دفء بسيط بدأ يحسّه إيدك...',
-    'البيضة بقت أدفى شوية، وفيه شيء بيتحرك جواها',
-    'قربتي... البيضة بتنبض بهدوء',
-    'دفء قوي حواليها دلوقتي',
-    'في صوت خفيف جوه البيضة!',
-    'حاسة إن حاجة جوه البيضة قربت تصحى',
-    'البيضة سخنة وبتهتز... ثانية واحدة كمان'
+  const HINTS_TEXT = [
+    'البيضة باردة... تحتاج لدفء يديك ',
+    'حرارة خفيفة تبدأ بالسرين في القشرة...',
+    'البيضة تصبح أدفأ وتلمع ببريق هادئ ',
+    'تسمعين نبضات حية بالداخل!',
+    'القشرة تتوهج بحرارة سحرية أشد...',
+    'اهتزازات واضحة وصوت نقر خفيف يُسمع!',
+    'شقوق ناعمة تظهر على القشرة! ',
+    'البيضة تهتز بقوة والشعاع يخرج من الشقوق!',
+    'القشرة تنكسر! المخلوق يستعد للظهور الآن!'
   ];
-  const REACTIONS = {
-    warm: ['البيضة سخنت شوية بين إيديكي', 'حسيتي بدفا بسيط بيسري جواها'],
-    sing: ['البيضة اهتزت لما سمعت صوتك', 'كأنها بتسمعك وبتهدى شوية'],
-    clean:['مسحتي عليها فلمعت رقعة صغيرة', 'ظهر جزء من رسمة غريبة تحت الغبار']
-  };
-  const REWARDS = { warm:{xp:5,galleons:10}, sing:{xp:3,galleons:7}, clean:{xp:5,galleons:10} };
 
-  const DRAGON_ACTIONS = {
-    pet:  { icon:'🤲', label:'دلّعيه',  xp:4, galleons:6, bond:6, lines:['هز ذيله بسعادة', 'قرّب راسه من إيدك بثقة'] },
-    play: { icon:'🌿', label:'العبي معاه', xp:5, galleons:8, bond:8, lines:['قفز فرحًا حواليكي', 'طار خطوة صغيرة وهبط ضاحكًا'] },
-    feed: { icon:'🍖', label:'أطعميه', xp:4, galleons:5, bond:5, lines:['أكل بسرعة وطلب المزيد', 'لعق إيدك شكرًا'] }
-  };
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  /* ============================================================
-     STATE
-  ============================================================ */
-  function randomSpecies(){ return SPECIES[Math.floor(Math.random()*SPECIES.length)].id; }
+  function preloadGameAssets() {
+    const imagesToLoad = [...EGG_STAGES_IMAGES];
+    STORE_ITEMS.forEach(item => imagesToLoad.push(item.img));
+    SPECIES_DATABASE.forEach(sp => {
+      imagesToLoad.push(sp.images.baby, sp.images.teen, sp.images.adult);
+    });
+    imagesToLoad.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }
 
-  function loadSave(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const p = raw ? JSON.parse(raw) : {};
+  function getRandomElement(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function loadState() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(SAVE_KEY));
       return {
-        warmth: p.warmth || 0,
-        xp: p.xp || 0,
-        galleons: p.galleons || 0,
-        introSeen: !!p.introSeen,
-        hatched: !!p.hatched,
-        speciesId: p.speciesId || randomSpecies(),
-        dragonName: p.dragonName || '',
-        bond: p.bond || 0,
-        owned: p.owned || [],
-        equipped: p.equipped || null,
-        lastCare: p.lastCare || {}
+        warmth: parsed.warmth || 0,
+        xp: parsed.xp || 0,
+        galleons: parsed.galleons || 0,
+        introSeen: !!parsed.introSeen,
+        hatched: !!parsed.hatched,
+        speciesId: parsed.speciesId || getRandomElement(SPECIES_DATABASE).id,
+        dragonName: parsed.dragonName || '',
+        stage: parsed.stage || 'baby',
+        bond: parsed.bond || 0,
+        unlockedSpecies: parsed.unlockedSpecies || [],
+        owned: parsed.owned || [],
+        equipped: parsed.equipped || null
       };
-    }catch(e){
-      return { warmth:0, xp:0, galleons:0, introSeen:false, hatched:false, speciesId:randomSpecies(),
-        dragonName:'', bond:0, owned:[], equipped:null, lastCare:{} };
+    } catch(e) {
+      return {
+        warmth: 0, xp: 0, galleons: 0, introSeen: false, hatched: false,
+        speciesId: getRandomElement(SPECIES_DATABASE).id,
+        dragonName: '', stage: 'baby', bond: 0, unlockedSpecies: [], owned: [], equipped: null
+      };
     }
   }
-  function persist(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(save)); }catch(e){} }
 
-  let save = loadSave();
-  let currentScreen = 'egg';
-
-  function species(){ return SPECIES.find(s => s.id === save.speciesId) || SPECIES[0]; }
-  function level(){ return Math.floor(save.xp / XP_PER_LEVEL) + 1; }
-
-  /* ============================================================
-     DRAGON SVG GENERATOR
-  ============================================================ */
-  function dragonSVG(sp, locked){
-    const c = locked ? { scale:'#4a473d', scaleDark:'#38362e', belly:'#5b5748', horn:'#2a2820' } : sp.colors;
-    return `
-    <svg viewBox="0 0 200 190" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="42" cy="112" rx="30" ry="20" fill="${c.scaleDark}" opacity="0.85" transform="rotate(-18 42 112)"/>
-      <ellipse cx="158" cy="112" rx="30" ry="20" fill="${c.scaleDark}" opacity="0.85" transform="rotate(18 158 112)"/>
-      <ellipse cx="100" cy="140" rx="54" ry="42" fill="${c.scale}" stroke="${locked?'#221f18':'#241608'}" stroke-width="2"/>
-      <ellipse cx="100" cy="150" rx="26" ry="27" fill="${c.belly}" opacity="0.9"/>
-      <path d="M78,58 C74,42 82,30 88,26 C86,38 90,48 96,54 Z" fill="${c.horn}"/>
-      <path d="M122,58 C126,42 118,30 112,26 C114,38 110,48 104,54 Z" fill="${c.horn}"/>
-      <path d="M92,44 L100,26 L108,44 Z" fill="${c.scaleDark}"/>
-      <circle cx="100" cy="82" r="40" fill="${c.scale}" stroke="${locked?'#221f18':'#241608'}" stroke-width="2"/>
-      <ellipse cx="100" cy="98" rx="16" ry="11" fill="${c.belly}" opacity="0.85"/>
-      <ellipse cx="82" cy="76" rx="9" ry="10" fill="#fff8ea"/>
-      <ellipse cx="118" cy="76" rx="9" ry="10" fill="#fff8ea"/>
-      <circle cx="83" cy="78" r="4.2" fill="#241608"/>
-      <circle cx="117" cy="78" r="4.2" fill="#241608"/>
-      <ellipse cx="90" cy="96" rx="2" ry="1.4" fill="#3a2a18" opacity="0.7"/>
-      <ellipse cx="110" cy="96" rx="2" ry="1.4" fill="#3a2a18" opacity="0.7"/>
-      ${locked ? '' : `<circle cx="70" cy="60" r="3" fill="${c.belly}" opacity="0.7"/><circle cx="130" cy="60" r="3" fill="${c.belly}" opacity="0.7"/>`}
-    </svg>`;
+  function saveState() {
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch(e){}
   }
 
-  /* ============================================================
-     LEDGER
-  ============================================================ */
+  let state = loadState();
+  let activeScreen = 'egg';
+  let isInteracting = false;
+  let actionClickCount = 0; // عداد التفاعلات الخمسة
+
+  function getCurrentSpecies() {
+    return SPECIES_DATABASE.find(s => s.id === state.speciesId) || SPECIES_DATABASE[0];
+  }
+
+  function getEggStageImage() {
+    if (state.warmth >= 6) return EGG_STAGES_IMAGES[2];
+    if (state.warmth >= 3) return EGG_STAGES_IMAGES[1];
+    return EGG_STAGES_IMAGES[0];
+  }
+
+  function getLevel() { return Math.floor(state.xp / XP_LEVEL_STEP) + 1; }
+
   const coinVal = document.getElementById('coinVal');
-  const coinIcon = document.getElementById('coinIcon');
   const xpVal = document.getElementById('xpVal');
-  const ringBadge = document.getElementById('ringBadge');
-  const ringLv = document.getElementById('ringLv');
-  const xpMedallion = document.getElementById('xpMedallion');
-  const coinMedallion = document.querySelector('.coin-side');
 
-  function renderLedger(){
-    coinVal.textContent = save.galleons;
-    const lv = level();
-    const progress = (save.xp % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
-    ringLv.textContent = lv;
-    xpVal.textContent = save.xp + ' XP';
-    ringBadge.style.setProperty('--p', progress);
+  function updateLedgerUI() {
+    coinVal.textContent = state.galleons;
+    xpVal.textContent = `LVL ${getLevel()} (${state.xp} XP)`;
   }
 
-  function spawnSpark(originEl){
-    const rect = originEl.getBoundingClientRect();
-    const el = document.createElement('span');
-    el.className = 'spark';
-    el.textContent = '✨';
-    el.style.left = (rect.left + rect.width/2 - 6) + 'px';
-    el.style.top = rect.top + 'px';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 900);
+  function addReward(xp, galleons) {
+    state.xp += xp; state.galleons += galleons;
+    saveState(); updateLedgerUI();
   }
 
-  function pulseLedger(){
-    [coinMedallion, xpMedallion].forEach(el => { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); });
-    coinIcon.classList.remove('flip'); void coinIcon.offsetWidth; coinIcon.classList.add('flip');
-    spawnSpark(coinMedallion); spawnSpark(xpMedallion);
+  // دالة لتغيير أي صورة بأنيميشن اختفاء وظهور سلس
+  function updateImageWithAnimation(imgElement, newSrc) {
+    if (!imgElement || imgElement.src.includes(newSrc)) return;
+    imgElement.classList.add('img-changing');
+    setTimeout(() => {
+      imgElement.src = newSrc;
+      imgElement.classList.remove('img-changing');
+    }, 400);
   }
 
-  function grant(xp, galleons){
-    save.xp += xp; save.galleons += galleons;
-    persist(); renderLedger(); pulseLedger();
-  }
-
-  /* ============================================================
-     SCREEN ROUTER
-  ============================================================ */
-  const screenContent = document.getElementById('screenContent');
+  const screenView = document.getElementById('screenView');
   const bottomNav = document.getElementById('bottomNav');
 
-  function goTo(name){
-    currentScreen = name;
-    renderScreen();
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.nav === name));
-    bottomNav.classList.toggle('show', save.hatched);
-    window.scrollTo({top:0, behavior:'smooth'});
+  function navigateTo(target) {
+    if (isInteracting) return;
+    activeScreen = target;
+    renderCurrentScreen();
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.target === target);
+    });
+    bottomNav.classList.toggle('show', state.hatched);
   }
 
-  function renderScreen(){
-    if(currentScreen === 'egg') renderEgg();
-    else if(currentScreen === 'hatching') renderHatching();
-    else if(currentScreen === 'dragon') renderDragon();
-    else if(currentScreen === 'store') renderStore();
-    else if(currentScreen === 'collection') renderCollection();
-    else if(currentScreen === 'chapter2') renderChapter2();
+  function renderCurrentScreen() {
+    if (activeScreen === 'egg') renderEggScreen();
+    else if (activeScreen === 'hatching') renderHatchingScreen();
+    else if (activeScreen === 'dragon') renderDragonScreen();
+    else if (activeScreen === 'store') renderStoreScreen();
+    else if (activeScreen === 'collection') renderCollectionScreen();
+    else if (activeScreen === 'chapter2') renderChapter2Screen();
   }
 
-  /* ============================================================
-     SCREEN: EGG ROOM
-  ============================================================ */
-  function renderEgg(){
-    screenContent.innerHTML = `
-      <div class="eyebrow">الفصل الأول &middot; بيضة في العتمة</div>
-      <h1 class="title">بيضة في العتمة</h1>
-      <div class="divider"></div>
-      <p class="story-text">
-        كنتُ أسير وحدي بين أشجار الغابة الممنوعة، والضباب يلتف حول الجذوع كأنه يخفي سرًّا لا يريد أن يُكشف.
-        وفجأة، سقط شيءٌ من بين الأغصان العالية، وارتطم بالأرض أمامي بصوتٍ خافت.
-        اقتربتُ بحذر... كانت بيضة، دافئة الملمس رغم برودة الليل. لم أستطع أن أتركها وحدها، فحملتها بين يديّ
-        وقررتُ أن أعتني بها حتى تفقس.
+  /* ============ 1. Egg Screen ============ */
+  function renderEggScreen() {
+    const eggStageNum = state.warmth >= 6 ? 3 : (state.warmth >= 3 ? 2 : 1);
+
+    screenView.innerHTML = `
+      <div class="card-kicker">CHAPTER I &middot; EGG STAGE ${eggStageNum}/3</div>
+      <h1 class="card-title">بيضة أزقة الغابة</h1>
+      <div class="card-divider"></div>
+      <p class="narrative-p">
+        عثرتِ بين أشجار الغابة الممنوعة على بيضة تنين نادرة. البيضة تتجاوب مع طاقاتكِ وتتطور عبر ثلاث مراحل سحرية حتى تتشقق القشرة.
       </p>
-      <div class="egg-scene">
-        <div class="nest-wrap" id="nestWrap">
-          <div class="glow" id="eggGlow"></div>
-          <svg class="egg-illustration" viewBox="0 0 220 260" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="110" cy="225" rx="95" ry="14" fill="rgba(0,0,0,0.35)"/>
-            <path class="nest-line" d="M25,225 C55,205 85,238 110,222 C135,238 165,205 195,225"/>
-            <path class="nest-line" d="M35,232 C65,214 90,244 110,230 C130,244 155,214 185,232" opacity="0.5"/>
-            <path class="nest-line" d="M45,238 C70,222 92,248 110,236 C128,248 150,222 175,238" opacity="0.35"/>
-            <path id="eggBody" class="egg-body" d="M110,20 C160,20 185,95 185,155 C185,212 152,238 110,238 C68,238 35,212 35,155 C35,95 60,20 110,20 Z"/>
-            <circle class="speckle" cx="88" cy="90" r="4"/><circle class="speckle" cx="132" cy="110" r="3"/>
-            <circle class="speckle" cx="100" cy="145" r="3.5"/><circle class="speckle" cx="140" cy="165" r="4"/>
-            <circle class="speckle" cx="80" cy="180" r="3"/><circle class="speckle" cx="120" cy="60" r="2.5"/>
-            <path class="crack crack-1" d="M95,55 L105,75 L98,95 L108,115"/>
-            <path class="crack crack-2" d="M150,110 L138,128 L146,148 L132,168"/>
-            <path class="crack crack-3" d="M70,140 L82,158 L74,178 L86,198 L78,215"/>
-          </svg>
-        </div>
+      <div class="dragon-display-frame">
+        <img src="${getEggStageImage()}" alt="Egg Stage ${eggStageNum}" class="main-dragon-img" id="eggImg">
       </div>
-      <div class="warmth-meter">
-        <span class="meter-label">الدفء</span>
-        <div class="meter-track"><div class="meter-fill" id="meterFill"></div></div>
+      <div class="meter-box">
+        <div class="meter-head"><span>مستوى الدفء (المرحلة ${eggStageNum})</span><span id="warmthPercent">${Math.round((state.warmth/MAX_EGG_WARMTH)*100)}%</span></div>
+        <div class="meter-track"><div class="meter-fill" id="meterFill" style="width:${(state.warmth/MAX_EGG_WARMTH)*100}%"></div></div>
       </div>
-      <div class="actions">
-        <div class="action-row">
-          <button class="care-btn" data-kind="warm">دفّيها 🔥</button>
-          <button class="care-btn" data-kind="sing">غنّيلها 🎵</button>
-          <button class="care-btn" data-kind="clean">نضّفيها ✨</button>
-        </div>
-        <p class="hint" id="hintText">${HINTS[Math.min(save.warmth, HINTS.length-1)]}</p>
+      <div class="action-grid">
+        <button class="btn-action" data-care="warm">
+          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 23c6.075 0 11-4.925 11-11S12 2 12 2 1 6.925 1 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+          تدفئة بالحرارة
+        </button>
+        <button class="btn-action" data-care="sing">
+          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+          تعويذة غنائية
+        </button>
       </div>
+      <div class="status-hint" id="statusHint">${HINTS_TEXT[Math.min(state.warmth, HINTS_TEXT.length-1)]}</div>
     `;
 
     const meterFill = document.getElementById('meterFill');
-    const eggGlow = document.getElementById('eggGlow');
-    const eggBody = document.getElementById('eggBody');
-    const nestWrap = document.getElementById('nestWrap');
-    const hintText = document.getElementById('hintText');
-    const cracks = [document.querySelector('.crack-1'), document.querySelector('.crack-2'), document.querySelector('.crack-3')];
-    const careButtons = Array.from(document.querySelectorAll('.care-btn'));
-    let reactionTimer = null;
+    const warmthPercent = document.getElementById('warmthPercent');
+    const statusHint = document.getElementById('statusHint');
 
-    function updateVisuals(){
-      const pct = (save.warmth / MAX_WARMTH) * 100;
-      meterFill.style.width = pct + '%';
-      eggGlow.style.opacity = Math.min(save.warmth/MAX_WARMTH, 1) * 0.9;
-      eggBody.style.filter = `drop-shadow(0 0 ${save.warmth*1.8}px rgba(255,122,69,${Math.min(save.warmth/MAX_WARMTH,1)*0.75}))`;
-      cracks.forEach((c,i) => { const th = (i+1)*(MAX_WARMTH/(cracks.length+0.3)); if(save.warmth >= th) c.classList.add('show'); });
-    }
-    function updateHint(){
-      hintText.textContent = HINTS[Math.min(save.warmth, HINTS.length-1)];
-    }
-    function spawnParticle(content){
-      const el = document.createElement(content ? 'span' : 'div');
-      el.className = 'care-particle' + (content ? '' : ' dot');
-      if(content) el.textContent = content;
-      el.style.left = (90 + Math.random()*40) + 'px';
-      el.style.top = (90 + Math.random()*60) + 'px';
-      nestWrap.appendChild(el);
-      setTimeout(() => el.remove(), 1000);
-    }
-    function flashReaction(kind){
-      const opts = REACTIONS[kind];
-      hintText.textContent = opts[Math.floor(Math.random()*opts.length)];
-      clearTimeout(reactionTimer);
-      reactionTimer = setTimeout(updateHint, 1200);
-    }
+    screenView.querySelectorAll('[data-care]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (state.warmth >= MAX_EGG_WARMTH) return;
+        state.warmth++;
+        addReward(5, 10);
+        
+        const newEggImg = getEggStageImage();
+        const eggImgElem = document.getElementById('eggImg');
+        updateImageWithAnimation(eggImgElem, newEggImg);
 
-    function careAction(kind){
-      if(save.warmth >= MAX_WARMTH) return;
-      save.warmth++;
-      const r = REWARDS[kind];
-      save.xp += r.xp; save.galleons += r.galleons;
-      persist(); renderLedger(); pulseLedger();
-      spawnParticle(kind === 'warm' ? null : (kind === 'sing' ? '🎵' : '✨'));
-      updateVisuals();
-      if(save.warmth >= MAX_WARMTH){
-        careButtons.forEach(b => b.disabled = true);
-        hintText.textContent = 'حسيتي بحركة قوية جوه البيضة... حاجة جوّاها هتخرج دلوقتي!';
-        nestWrap.classList.add('egg-shatter');
-        setTimeout(() => goTo('hatching'), 1500);
-      } else {
-        flashReaction(kind);
-      }
-    }
+        const pct = Math.round((state.warmth / MAX_EGG_WARMTH) * 100);
+        meterFill.style.width = pct + '%';
+        warmthPercent.textContent = pct + '%';
+        statusHint.textContent = HINTS_TEXT[Math.min(state.warmth, HINTS_TEXT.length-1)];
 
-    careButtons.forEach(b => b.addEventListener('click', () => careAction(b.dataset.kind)));
-    updateVisuals();
-  }
-
-  /* ============================================================
-     SCREEN: HATCHING
-  ============================================================ */
-  function renderHatching(){
-    const sp = species();
-    screenContent.innerHTML = `
-      <div class="eyebrow">لحظة الفقس</div>
-      <h1 class="title">شيء وُلد الليلة</h1>
-      <div class="divider"></div>
-      <p class="story-text" id="hatchText">
-        تكسّرت القشرة أخيرًا بصوتٍ خفيف، وخرج من داخلها مخلوقٌ صغير يفتح عينيه لأول مرة على العالم...
-        وينظر إليكِ مباشرة، كأنه اختاركِ قبل أن تختاريه.
-      </p>
-      <div class="dragon-stage">${dragonSVG(sp, false)}</div>
-      <div class="dragon-name-row">
-        <div class="dragon-species">${sp.name} &middot; ${sp.title}</div>
-      </div>
-      <p class="story-text" style="text-align:center; font-size:16px; margin-top:6px;">سمّي رفيقك الجديد:</p>
-      <div class="name-form">
-        <input class="name-input" id="nameInput" maxlength="18" placeholder="اسم التنين..." value="${save.dragonName || ''}">
-      </div>
-      <div class="actions">
-        <button class="btn-primary" id="confirmNameBtn">أكّدي الاسم وابدئي الرحلة</button>
-      </div>
-    `;
-    const input = document.getElementById('nameInput');
-    const btn = document.getElementById('confirmNameBtn');
-    btn.addEventListener('click', () => {
-      const val = input.value.trim();
-      save.dragonName = val || sp.name;
-      save.hatched = true;
-      persist();
-      grant(10, 15);
-      bottomNav.classList.add('show');
-      goTo('dragon');
-    });
-  }
-
-  /* ============================================================
-     SCREEN: DRAGON ROOM
-  ============================================================ */
-  function renderDragon(){
-    const sp = species();
-    const equippedItem = ITEMS.find(i => i.id === save.equipped);
-    screenContent.innerHTML = `
-      <div class="eyebrow">الفصل الثاني &middot; رفيقك</div>
-      <h1 class="title">${save.dragonName}</h1>
-      <div class="divider"></div>
-      <div class="dragon-stage">
-        ${equippedItem ? `<span class="equipped-badge">${equippedItem.icon}</span>` : ''}
-        ${dragonSVG(sp, false)}
-      </div>
-      <div class="dragon-name-row"><div class="dragon-species">${sp.name} &middot; ${sp.title}</div></div>
-      <p class="story-text" style="text-align:center; font-size:16px;">${sp.desc}</p>
-      <div class="bond-meter">
-        <span class="meter-label">الألفة</span>
-        <div class="meter-track"><div class="meter-fill bond-fill" id="bondFill" style="width:${save.bond}%"></div></div>
-      </div>
-      <div class="actions">
-        <div class="action-row" id="dragonActions">
-          ${Object.entries(DRAGON_ACTIONS).map(([key,a]) => `
-            <button class="care-btn" data-kind="${key}" data-cd="0">${a.label} ${a.icon}</button>
-          `).join('')}
-        </div>
-        <p class="hint" id="dragonHint">دلّليه ليكبر معاكِ ويحصلّك على غاليونات وخبرة</p>
-        <p class="cooldown-note" id="cooldownNote"></p>
-      </div>
-    `;
-
-    const bondFill = document.getElementById('bondFill');
-    const hint = document.getElementById('dragonHint');
-    const cooldownNote = document.getElementById('cooldownNote');
-    const buttons = Array.from(document.querySelectorAll('#dragonActions .care-btn'));
-
-    function msLeft(kind){
-      const last = save.lastCare[kind] || 0;
-      return Math.max(0, CARE_COOLDOWN_MS - (Date.now() - last));
-    }
-    function tickCooldowns(){
-      let anyActive = false;
-      buttons.forEach(b => {
-        const left = msLeft(b.dataset.kind);
-        b.disabled = left > 0;
-        if(left > 0) anyActive = true;
+        if (state.warmth >= MAX_EGG_WARMTH) {
+          statusHint.textContent = 'تشققت البيضة بالكامل! جاري الفقس... 🐉';
+          setTimeout(() => navigateTo('hatching'), 1200);
+        }
       });
-      if(anyActive){
-        const nearest = Math.min(...buttons.map(b => msLeft(b.dataset.kind)).filter(v => v > 0));
-        cooldownNote.textContent = 'استني ' + Math.ceil(nearest/1000) + ' ثانية عشان تعتني بيه تاني';
-      } else {
-        cooldownNote.textContent = '';
-      }
-    }
-
-    function doAction(kind){
-      if(msLeft(kind) > 0) return;
-      const a = DRAGON_ACTIONS[kind];
-      save.bond = Math.min(100, save.bond + a.bond);
-      save.lastCare[kind] = Date.now();
-      grant(a.xp, a.galleons);
-      persist();
-      bondFill.style.width = save.bond + '%';
-      hint.textContent = a.lines[Math.floor(Math.random()*a.lines.length)];
-      tickCooldowns();
-    }
-
-    buttons.forEach(b => b.addEventListener('click', () => doAction(b.dataset.kind)));
-    tickCooldowns();
-    const interval = setInterval(() => {
-      if(currentScreen !== 'dragon'){ clearInterval(interval); return; }
-      tickCooldowns();
-    }, 1000);
-  }
-
-  /* ============================================================
-     SCREEN: STORE
-  ============================================================ */
-  function renderStore(){
-    screenContent.innerHTML = `
-      <div class="eyebrow">المتجر</div>
-      <h1 class="title">سوق حرّاس التنانين</h1>
-      <div class="divider"></div>
-      <p class="story-text" style="text-align:center; font-size:16px;">بدّلي غاليوناتك بطعام ومقتنيات لرفيقك.</p>
-      <div class="store-grid" id="storeGrid">
-        ${ITEMS.map(item => storeCardHTML(item)).join('')}
-      </div>
-    `;
-    document.getElementById('storeGrid').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-buy], [data-equip]');
-      if(!btn) return;
-      if(btn.dataset.buy) buyItem(btn.dataset.buy);
-      if(btn.dataset.equip) equipItem(btn.dataset.equip);
     });
   }
 
-  function storeCardHTML(item){
-    const owned = save.owned.includes(item.id);
-    const equipped = save.equipped === item.id;
-    let btnHTML;
-    if(item.type === 'accessory'){
-      if(equipped) btnHTML = `<button class="store-btn equipped" data-equip="${item.id}">مُجهّز الآن ✓</button>`;
-      else if(owned) btnHTML = `<button class="store-btn owned" data-equip="${item.id}">جهّزيه</button>`;
-      else btnHTML = `<button class="store-btn buy" data-buy="${item.id}" ${save.galleons < item.price ? 'disabled':''}>شراء</button>`;
-    } else {
-      btnHTML = `<button class="store-btn buy" data-buy="${item.id}" ${save.galleons < item.price ? 'disabled':''}>شراء</button>`;
+  /* ============ 2. Hatching Screen ============ */
+  function renderHatchingScreen() {
+    const sp = getCurrentSpecies();
+    screenView.innerHTML = `
+      <div class="card-kicker">SPECIES UNLOCKED</div>
+      <h1 class="card-title">فقست البيضة السحرية!</h1>
+      <div class="card-divider"></div>
+      <div class="dragon-display-frame">
+        <img src="${sp.images.baby}" alt="${sp.name}" class="main-dragon-img">
+      </div>
+      <div style="text-align:center;">
+        <h2 style="color:var(--gold-bright); font-size:22px; font-family:'Aref Ruqaa', serif;">${sp.name}</h2>
+        <span style="font-family:'Cinzel'; font-size:12px; color:var(--magic-blue);">${sp.english}</span>
+      </div>
+      <p style="text-align:center; margin-top:14px; font-size:14px; color:var(--text-muted); font-family:'Marhey', cursive;">اختاري اسمًا سحريًا يليق بتنينك الجديد:</p>
+      <div class="input-group">
+        <input type="text" id="nameInput" class="luxury-input" maxlength="18" placeholder="اسم التنين..." value="${state.dragonName}">
+      </div>
+      <div style="text-align:center;">
+        <button class="btn-action" id="saveNameBtn" style="margin:0 auto;">تأكيد وإضافة للسجل </button>
+      </div>
+    `;
+
+    document.getElementById('saveNameBtn').addEventListener('click', () => {
+      const val = document.getElementById('nameInput').value.trim();
+      state.dragonName = val || sp.name;
+      state.hatched = true;
+      
+      if (!state.unlockedSpecies.includes(sp.id)) {
+        state.unlockedSpecies.push(sp.id);
+      }
+
+      saveState(); addReward(10, 20);
+      navigateTo('dragon');
+    });
+  }
+
+  /* ============ 3. Dragon Main Screen (Updated with 5-limit & 5s sleep) ============ */
+  function renderDragonScreen() {
+    const sp = getCurrentSpecies();
+    
+    if (state.bond >= 75) state.stage = 'adult';
+    else if (state.bond >= 35) state.stage = 'teen';
+    else state.stage = 'baby';
+
+    const currentImg = sp.images[state.stage] || sp.images.baby;
+    
+    const equippedItem = STORE_ITEMS.find(i => i.id === state.equipped);
+    const badgeHTML = equippedItem ? `
+      <div class="equipped-badge">
+        <img src="${equippedItem.img}" alt="${equippedItem.name}">
+        <span>${equippedItem.name}</span>
+      </div>
+    ` : '';
+
+    let stageLabel = 'صغير (Baby)';
+    if (state.stage === 'teen') stageLabel = 'يافع (Teen)';
+    if (state.stage === 'adult') stageLabel = 'بالغ (Adult)';
+
+    screenView.innerHTML = `
+      <div class="card-kicker">STAGE: ${stageLabel}</div>
+      <h1 class="card-title">${state.dragonName}</h1>
+      <div class="card-divider"></div>
+      
+      <div class="dragon-display-frame">
+        ${badgeHTML}
+        <img src="${currentImg}" alt="${sp.name}" class="main-dragon-img" id="dragonImg">
+      </div>
+
+      <div style="text-align:center; margin-bottom:12px;">
+        <p style="font-size:14px; color:var(--text-muted); margin-top:4px; font-weight:300;">${sp.desc}</p>
+      </div>
+
+      <div class="meter-box">
+        <div class="meter-head"><span>مستوى الرابطة والنمو</span><span id="bondPercent">${state.bond}%</span></div>
+        <div class="meter-track"><div class="meter-fill bond" id="bondFill" style="width:${state.bond}%"></div></div>
+      </div>
+
+      <div class="action-grid" id="careActions">
+        <button class="btn-action" data-type="pet">
+          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          ملاطفة 
+        </button>
+        <button class="btn-action" data-type="play">
+          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          لعب وتدريب 
+        </button>
+        <button class="btn-action" data-type="feed">
+          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.46 3.9 3.45 4.38l-.95 7.62h3l-.95-7.62C9.54 12.9 11 11.12 11 9zm7-7v12h2V2h-2z"/></svg>
+          إطعام 
+        </button>
+      </div>
+      
+      <div class="status-hint" id="careHint">اعتني بتنينك لزيادة الرابطة ليصل لمرحلة البلوغ! ✨ (${actionClickCount}/5)</div>
+      <div class="timer-counter" id="timerCounter"></div>
+    `;
+
+    const careHint = document.getElementById('careHint');
+    const timerCounter = document.getElementById('timerCounter');
+    const dragonImg = document.getElementById('dragonImg');
+    const bondFill = document.getElementById('bondFill');
+    const bondPercent = document.getElementById('bondPercent');
+    const careBtns = Array.from(screenView.querySelectorAll('#careActions .btn-action'));
+
+    function setButtonsState(disabled) {
+      careBtns.forEach(btn => btn.disabled = disabled);
     }
-    return `
-      <div class="store-card">
-        <span class="icon">${item.icon}</span>
-        <div class="name">${item.name}</div>
-        <div class="price">🪙 ${item.price}</div>
-        ${btnHTML}
-      </div>`;
-  }
 
-  function buyItem(id){
-    const item = ITEMS.find(i => i.id === id);
-    if(!item || save.galleons < item.price) return;
-    save.galleons -= item.price;
-    if(item.type === 'accessory'){
-      if(!save.owned.includes(id)) save.owned.push(id);
-    } else {
-      save.bond = Math.min(100, save.bond + 6);
-      save.xp += 2;
+    async function handleCareClick(type) {
+      if (isInteracting) return;
+
+      actionClickCount++;
+      state.bond = Math.min(100, state.bond + 3);
+      addReward(2, 3);
+      
+      bondFill.style.width = state.bond + '%';
+      bondPercent.textContent = state.bond + '%';
+
+      // حركة سريعة للأنيميشن عند كل ضغطة
+      dragonImg.classList.add('action-anim');
+      setTimeout(() => dragonImg.classList.remove('action-anim'), 300);
+
+      let actionText = '';
+      if (type === 'feed') actionText = 'استمتع بالوجبة الشهية! ';
+      else if (type === 'play') actionText = 'قفز ولعب بحماس! ';
+      else actionText = 'شعر بالود والدفء... ';
+
+      // التحقق من الانتقال لمرحلة نمو جديدة بتأثير أنيميشن للـ image
+      const oldStage = state.stage;
+      if (state.bond >= 75) state.stage = 'adult';
+      else if (state.bond >= 35) state.stage = 'teen';
+
+      if (oldStage !== state.stage) {
+        updateImageWithAnimation(dragonImg, sp.images[state.stage]);
+      }
+
+      // إذا وصلنا إلى الحد الأقصى (5 مرات)
+      if (actionClickCount >= 5) {
+        isInteracting = true;
+        setButtonsState(true);
+        careHint.textContent = `${actionText} التنين تعب ومحتاج ينام شوية... `;
+        dragonImg.classList.add('sleep-anim');
+
+        // عداد 5 ثوانٍ للنوم
+        for (let sec = 5; sec > 0; sec--) {
+          timerCounter.textContent = `💤 التنين في غفوة نوم... باقي ${sec} ثوانٍ`;
+          await sleep(1000);
+        }
+
+        // إعادة التعيين بعد النوم
+        actionClickCount = 0;
+        isInteracting = false;
+        dragonImg.classList.remove('sleep-anim');
+        timerCounter.textContent = '';
+        careHint.textContent = 'صحى التنين ونشيط ومستعد للتفاعل  (0/5)';
+        setButtonsState(false);
+      } else {
+        careHint.textContent = `${actionText} (${actionClickCount}/5)`;
+      }
+
+      saveState();
     }
-    persist(); renderLedger(); pulseLedger(); renderStore();
+
+    careBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        handleCareClick(btn.dataset.type);
+      });
+    });
   }
 
-  function equipItem(id){
-    save.equipped = save.equipped === id ? null : id;
-    persist(); renderStore();
-  }
+  /* ============ 4. Store Screen ============ */
+  function renderStoreScreen() {
+    screenView.innerHTML = `
+      <div class="card-kicker">DIAGON ALLEY MARKET</div>
+      <h1 class="card-title">سوق الأدوات السحرية</h1>
+      <div class="card-divider"></div>
+      <div class="catalog-grid">
+        ${STORE_ITEMS.map(item => {
+          const isOwned = state.owned.includes(item.id);
+          const isEquipped = state.equipped === item.id;
+          let btnText = 'شراء';
+          let btnClass = 'btn-store';
+          
+          if (item.type === 'accessory') {
+            if (isEquipped) { btnText = 'مُجهّز'; btnClass += ' equipped'; }
+            else if (isOwned) { btnText = 'تجهيز الوسام'; }
+          }
 
-  /* ============================================================
-     SCREEN: COLLECTION
-  ============================================================ */
-  function renderCollection(){
-    screenContent.innerHTML = `
-      <div class="eyebrow">سجل المخلوقات</div>
-      <h1 class="title">سجل الحارس</h1>
-      <div class="divider"></div>
-      <p class="story-text" style="text-align:center; font-size:16px;">كل تنين تقابليه في رحلتك هيتسجّل هنا.</p>
-      <div class="collection-grid" id="collectionGrid">
-        ${SPECIES.map(sp => {
-          const discovered = sp.id === save.speciesId;
           return `
-          <div class="medal ${discovered ? '' : 'locked'}" data-id="${sp.id}">
-            ${discovered ? dragonSVG(sp, false) : dragonSVG(sp, true)}
-            <div class="mname">${discovered ? sp.name : '؟ ؟ ؟'}</div>
-          </div>`;
+            <div class="catalog-item">
+              <img src="${item.img}" alt="${item.name}">
+              <div class="item-title">${item.name}</div>
+              <div class="item-cost">${item.price} GALLEONS</div>
+              <button class="${btnClass}" data-id="${item.id}" ${(!isOwned && state.galleons < item.price) ? 'disabled' : ''}>
+                ${btnText}
+              </button>
+            </div>
+          `;
         }).join('')}
       </div>
-      <div class="collection-detail" id="collectionDetail"></div>
-      <p class="hint" style="text-align:center; margin-top:16px;">أنواع تانية من التنانين هتظهر في فصول جايّة...</p>
     `;
-    const grid = document.getElementById('collectionGrid');
-    const detail = document.getElementById('collectionDetail');
-    grid.addEventListener('click', (e) => {
-      const el = e.target.closest('.medal');
-      if(!el) return;
-      const sp = SPECIES.find(s => s.id === el.dataset.id);
-      if(el.classList.contains('locked')){
-        detail.classList.add('show');
-        detail.innerHTML = `<h3>مخلوق مجهول</h3><div class="tag">لسه ما اتكشفش</div><p>هتقابلي هذا النوع في فصول قادمة من الرحلة.</p>`;
-        return;
-      }
-      detail.classList.add('show');
-      detail.innerHTML = `<h3>${sp.name}</h3><div class="tag">${sp.title}</div><p>${sp.desc}</p>`;
+
+    screenView.querySelectorAll('.btn-store').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.dataset.id;
+        const item = STORE_ITEMS.find(i => i.id === id);
+        if (!item) return;
+
+        if (item.type === 'accessory') {
+          if (state.owned.includes(id)) {
+            state.equipped = (state.equipped === id) ? null : id;
+          } else if (state.galleons >= item.price) {
+            state.galleons -= item.price;
+            state.owned.push(id);
+            state.equipped = id;
+          }
+        } else {
+          if (state.galleons >= item.price) {
+            state.galleons -= item.price;
+            state.bond = Math.min(100, state.bond + 10);
+          }
+        }
+        saveState(); updateLedgerUI(); renderStoreScreen();
+      });
     });
   }
 
-  /* ============================================================
-     SCREEN: CHAPTER 2 TEASER
-  ============================================================ */
-  function renderChapter2(){
-    const need = 5;
-    const lv = level();
-    const ready = lv >= need;
-    const pct = Math.min(100, (lv/need)*100);
-    screenContent.innerHTML = `
-      <div class="eyebrow">قادم قريبًا</div>
-      <h1 class="title">الفصل الثاني: غابة الرماد</h1>
-      <div class="divider"></div>
-      <div class="seal">🔥</div>
-      <p class="story-text" style="text-align:center;">
-        وراء الأشجار المحترقة، حيث لا يطأ حارس قدمه بمفرده، تبدأ حكاية جديدة تنتظر ${save.dragonName || 'رفيقك'}...
+  /* ============ 5. Archive Screen ============ */
+  function renderCollectionScreen() {
+    screenView.innerHTML = `
+      <div class="card-kicker">MAGIZOOLOGY ARCHIVE</div>
+      <h1 class="card-title">موسوعة التنانين</h1>
+      <div class="card-divider"></div>
+      <div class="archive-grid">
+        ${SPECIES_DATABASE.map(sp => {
+          const isDiscovered = state.unlockedSpecies.includes(sp.id);
+          return `
+            <div class="archive-card ${isDiscovered ? '' : 'locked'}" data-id="${sp.id}">
+              <img src="${sp.images.adult}" alt="${sp.name}">
+              <div class="label">${isDiscovered ? sp.name : 'سلالة غامضة'}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <div class="archive-details-box" id="archiveDetails"></div>
+    `;
+
+    const archiveDetails = document.getElementById('archiveDetails');
+    screenView.querySelectorAll('.archive-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const sp = SPECIES_DATABASE.find(s => s.id === card.dataset.id);
+        if (card.classList.contains('locked')) {
+          archiveDetails.classList.add('show');
+          archiveDetails.innerHTML = `<h3>سلالة لم تُكتشف بعد</h3><p style="font-size:13px; color:var(--text-muted); font-family:'Marhey', cursive;">ستتم إضافتها تلقائيًا لهذه الموسوعة بمجرد العثور على بيضتها وتجميعها!</p>`;
+          return;
+        }
+        archiveDetails.classList.add('show');
+        archiveDetails.innerHTML = `
+          <h3>${sp.name}</h3>
+          <div class="sub-title">${sp.english}</div>
+          <p style="font-size:14px; line-height:1.8; color:var(--text-primary); font-weight:300;">${sp.desc}</p>
+        `;
+      });
+    });
+  }
+
+  /* ============ 6. Chapter 2 Screen ============ */
+  function renderChapter2Screen() {
+    screenView.innerHTML = `
+      <div class="card-kicker">CHAPTER II &middot; COMING SOON</div>
+      <h1 class="card-title">وادي أشتار السحري</h1>
+      <div class="card-divider"></div>
+      <div class="dragon-display-frame">
+        <p style="color:var(--gold-bright); font-size:14px; font-family:'Marhey', cursive;">[ رحلة الاستكشاف القادمة ]</p>
+      </div>
+      <p class="narrative-p" style="text-align:center;">
+        المغامرة تنتظر ${state.dragonName || 'تنينك'} لخوض مواجهات مع مخلوقات سحرية أعتى واستكشاف أسرار المحميات القديمة...
       </p>
-      ${ready
-        ? `<p class="hint" style="text-align:center; color:var(--spell);">وصلتِ للمستوى المطلوب! الفصل جاهز يبدأ قريبًا — ترقّبيه.</p>`
-        : `<div class="progress-toward">
-             <div class="meter-label ui-face" style="text-align:center; margin-bottom:6px;">يفتح عند المستوى ${need} &middot; إنتي دلوقتي مستوى ${lv}</div>
-             <div class="meter-track"><div class="meter-fill" style="width:${pct}%"></div></div>
-           </div>`
-      }
     `;
   }
 
-  /* ============================================================
-     NAV
-  ============================================================ */
   bottomNav.addEventListener('click', (e) => {
-    const btn = e.target.closest('.nav-btn');
-    if(!btn) return;
-    goTo(btn.dataset.nav);
+    const item = e.target.closest('.nav-item');
+    if (item) navigateTo(item.dataset.target);
   });
 
-  /* ============================================================
-     AMBIENT SCENE (trees + wisps)
-  ============================================================ */
-  function buildTrees(containerId, count, minH, maxH, minW, maxW, swayRange){
-    const container = document.getElementById(containerId);
-    for(let i=0;i<count;i++){
-      const tree = document.createElement('div');
-      tree.className = 'tree' + (swayRange ? ' sway' : '');
-      const h = minH + Math.random()*(maxH-minH);
-      const w = minW + Math.random()*(maxW-minW);
-      tree.style.height = h+'px'; tree.style.width = w+'px';
-      tree.style.left = ((i/count)*100 + Math.random()*(100/count)*0.6)+'%';
-      if(swayRange){
-        const dur = swayRange[0] + Math.random()*(swayRange[1]-swayRange[0]);
-        tree.style.animationDuration = dur+'s';
-        tree.style.animationDelay = (Math.random()*-dur)+'s';
-      }
-      container.appendChild(tree);
-    }
-  }
-  function buildWisps(count){
-    const container = document.getElementById('wisps');
-    for(let i=0;i<count;i++){
-      const w = document.createElement('span');
-      w.className = 'wisp';
-      w.style.left = (Math.random()*100)+'%';
-      w.style.top = (38+Math.random()*55)+'%';
-      w.style.setProperty('--dx', (Math.random()*40-20)+'px');
-      const floatDur = 5+Math.random()*6, flickerDur = 2+Math.random()*3;
-      w.style.animationDuration = floatDur+'s, '+flickerDur+'s';
-      w.style.animationDelay = (Math.random()*-floatDur)+'s, '+(Math.random()*-flickerDur)+'s';
-      container.appendChild(w);
-    }
-  }
-  const treesBack = document.createElement('div'); // placeholder not used, containers already in DOM
-
-  buildTrees('treesBack', 7, 110, 170, 50, 90, null);
-  buildTrees('treesMid', 6, 150, 230, 60, 110, [8,12]);
-  buildTrees('treesFront', 4, 200, 300, 90, 150, [6,9]);
-  buildWisps(10);
-
-  /* ============================================================
-     CINEMATIC INTRO
-  ============================================================ */
+  /* ============ Cinema Video Sequence ============ */
   const cinema = document.getElementById('cinema');
   const appShell = document.getElementById('appShell');
-  const pageCard = document.getElementById('pageCard');
+  const mainCard = document.getElementById('mainCard');
   const cinemaCaption = document.getElementById('cinemaCaption');
   const skipBtn = document.getElementById('skipBtn');
   const videos = [document.getElementById('vid1'), document.getElementById('vid2'), document.getElementById('vid3')];
-  const dashFills = [document.getElementById('dashFill0'), document.getElementById('dashFill1'), document.getElementById('dashFill2')];
-  const captions = [
-    'الغابة الممنوعة... والضباب يخفي أكتر مما يُظهر',
-    'فجأة... شيء سقط من العتمة',
-    'بيضة، دافئة رغم برودة الليل'
+  const subtitles = [
+    'أسرار قديمة تتوارثها الغابة الممنوعة...',
+    'بريق سحري ينبعث بين الظلال...',
+    'بيضة تنين أسطورية تنتظر حارسها الجديد'
   ];
-  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function showCaption(text){
-    cinemaCaption.classList.remove('show');
-    cinemaCaption.textContent = text;
-    void cinemaCaption.offsetWidth;
+  function playVideoStep(index) {
+    if (index >= videos.length) { exitCinema(); return; }
+    videos.forEach((v, i) => v.classList.toggle('active', i === index));
+    cinemaCaption.textContent = subtitles[index];
     cinemaCaption.classList.add('show');
+
+    const activeVid = videos[index];
+    activeVid.currentTime = 0;
+    activeVid.onended = () => playVideoStep(index + 1);
+    activeVid.play().catch(() => playVideoStep(index + 1));
   }
-  function playClip(i){
-    if(i >= videos.length){ endCinema(); return; }
-    videos.forEach((v,idx) => v.classList.toggle('active', idx===i));
-    dashFills.forEach((f,idx) => { f.style.animation='none'; f.style.width = idx<i ? '100%':'0%'; });
-    void dashFills[i].offsetWidth;
-    dashFills[i].style.animation = 'dashFill 5.05s linear forwards';
-    showCaption(captions[i]);
-    const v = videos[i];
-    v.currentTime = 0;
-    v.onended = () => playClip(i+1);
-    v.play().catch(() => playClip(i+1));
-  }
-  function endCinema(){
-    save.introSeen = true; persist();
+
+  function exitCinema() {
+    state.introSeen = true; saveState();
     cinema.classList.add('leaving');
-    setTimeout(() => { cinema.style.display = 'none'; }, reduceMotion ? 0 : 1050);
-    launchApp();
+    setTimeout(() => { cinema.style.display = 'none'; }, 800);
+    startApp();
   }
-  skipBtn.addEventListener('click', () => { videos.forEach(v => v.pause()); endCinema(); });
 
-  function launchApp(){
+  skipBtn.addEventListener('click', () => { videos.forEach(v => v.pause()); exitCinema(); });
+
+  function startApp() {
+    preloadGameAssets();
     appShell.classList.add('show');
-    pageCard.classList.add('reveal');
-    renderLedger();
-    goTo(save.hatched ? 'dragon' : 'egg');
-    if(save.hatched) bottomNav.classList.add('show');
+    mainCard.classList.add('reveal');
+    updateLedgerUI();
+    navigateTo(state.hatched ? 'dragon' : 'egg');
+    if (state.hatched) bottomNav.classList.add('show');
   }
 
-  if(save.introSeen || reduceMotion){
+  if (state.introSeen) {
     cinema.style.display = 'none';
-    launchApp();
+    startApp();
   } else {
-    playClip(0);
+    playVideoStep(0);
   }
 })();
 </script>
