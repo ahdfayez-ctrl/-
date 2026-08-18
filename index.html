@@ -138,7 +138,6 @@
     overflow: hidden;
   }
   
-  /* أنيميشن تحويل وتغيير الصورة بشكل سلس */
   .dragon-display-frame img.main-dragon-img {
     max-height: 100%; max-width: 100%; object-fit: contain;
     filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
@@ -152,7 +151,6 @@
     transform: scale(0.92);
   }
 
-  /* تأثيرات الحركة أثناء اللعب والنوم */
   .action-anim { animation: pulseAction 0.4s infinite alternate; }
   .sleep-anim { animation: sleepWiggle 1.5s infinite ease-in-out; filter: grayscale(0.4) brightness(0.8) !important; }
 
@@ -256,6 +254,8 @@
     transition: all 0.25s ease; font-family: 'Marhey', cursive;
   }
   .nav-item:hover, .nav-item.active { border-color: var(--border-gold); color: var(--gold-bright); background: rgba(212, 163, 89, 0.15); transform: translateY(-2px); }
+  .nav-item.locked-nav { opacity: 0.4; cursor: not-allowed; border-color: #555; }
+  .nav-item.locked-nav:hover { transform: none; background: rgba(19, 24, 34, 0.9); color: var(--text-muted); border-color: #555; }
 
   @media (max-width: 480px) {
     .grimoire-card { padding: 26px 16px 20px; }
@@ -272,7 +272,7 @@
     <video class="cinema-video" id="vid3" src="video3.mp4" muted playsinline preload="auto"></video>
     <div class="cinema-overlay"></div>
     <div class="cinema-badge">CHAPTER I &middot; FORBIDDEN FORESTS</div>
-    <button class="cinema-skip" id="skipBtn">تخطي العرض ✨</button>
+    <button class="cinema-skip" id="skipBtn">تخطي العرض </button>
     <div class="cinema-caption" id="cinemaCaption"></div>
   </div>
 
@@ -316,9 +316,9 @@
       <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h2v8l2.5-1.5L13 12V4h5v16z"/></svg>
       السجل
     </button>
-    <button class="nav-item" data-target="chapter2">
-      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z M5 13.18v4l7 3.82 7-3.82v-4L12 17l-7-3.82z"/></svg>
-      الفصل التالي
+    <button class="nav-item locked-nav" data-target="chapter2" id="navChapter2">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      المستوى الثاني 
     </button>
   </nav>
 
@@ -326,7 +326,7 @@
 (function(){
   "use strict";
 
-  const SAVE_KEY = 'dragonKeeperSave_v9';
+  const SAVE_KEY = 'dragonKeeperSave_v12';
   const MAX_EGG_WARMTH = 9;
   const XP_LEVEL_STEP = 50;
 
@@ -389,12 +389,12 @@
     'البيضة باردة... تحتاج لدفء يديك ',
     'حرارة خفيفة تبدأ بالسرين في القشرة...',
     'البيضة تصبح أدفأ وتلمع ببريق هادئ ',
-    'تسمعين نبضات حية بالداخل!',
+    'المرحلة الثانية: تسمعين نبضات حية بالداخل!',
     'القشرة تتوهج بحرارة سحرية أشد...',
     'اهتزازات واضحة وصوت نقر خفيف يُسمع!',
     'شقوق ناعمة تظهر على القشرة! ',
     'البيضة تهتز بقوة والشعاع يخرج من الشقوق!',
-    'القشرة تنكسر! المخلوق يستعد للظهور الآن!'
+    'الفقس محقق! تظهر الآن والقشرة تتكسر!'
   ];
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -428,13 +428,15 @@
         bond: parsed.bond || 0,
         unlockedSpecies: parsed.unlockedSpecies || [],
         owned: parsed.owned || [],
-        equipped: parsed.equipped || null
+        equipped: parsed.equipped || null,
+        level1Completed: !!parsed.level1Completed
       };
     } catch(e) {
       return {
         warmth: 0, xp: 0, galleons: 0, introSeen: false, hatched: false,
         speciesId: getRandomElement(SPECIES_DATABASE).id,
-        dragonName: '', stage: 'baby', bond: 0, unlockedSpecies: [], owned: [], equipped: null
+        dragonName: '', stage: 'baby', bond: 0, unlockedSpecies: [], owned: [], equipped: null,
+        level1Completed: false
       };
     }
   }
@@ -446,16 +448,23 @@
   let state = loadState();
   let activeScreen = 'egg';
   let isInteracting = false;
-  let actionClickCount = 0; // عداد التفاعلات الخمسة
+  let actionClickCount = 0;
 
   function getCurrentSpecies() {
     return SPECIES_DATABASE.find(s => s.id === state.speciesId) || SPECIES_DATABASE[0];
   }
 
   function getEggStageImage() {
-    if (state.warmth >= 6) return EGG_STAGES_IMAGES[2];
-    if (state.warmth >= 3) return EGG_STAGES_IMAGES[1];
+    if (state.warmth >= MAX_EGG_WARMTH) return EGG_STAGES_IMAGES[2];
+    if (state.warmth >= 4) return EGG_STAGES_IMAGES[1];
     return EGG_STAGES_IMAGES[0];
+  }
+
+  // حساب مرحلة التنين بدقة حسب النسبة
+  function getDragonStage() {
+    if (state.bond >= 100) return 'adult';
+    if (state.bond >= 50) return 'teen';
+    return 'baby';
   }
 
   function getLevel() { return Math.floor(state.xp / XP_LEVEL_STEP) + 1; }
@@ -473,7 +482,6 @@
     saveState(); updateLedgerUI();
   }
 
-  // دالة لتغيير أي صورة بأنيميشن اختفاء وظهور سلس
   function updateImageWithAnimation(imgElement, newSrc) {
     if (!imgElement || imgElement.src.includes(newSrc)) return;
     imgElement.classList.add('img-changing');
@@ -486,14 +494,36 @@
   const screenView = document.getElementById('screenView');
   const bottomNav = document.getElementById('bottomNav');
 
+  function updateNavState() {
+    const navCh2 = document.getElementById('navChapter2');
+    if (state.level1Completed || state.bond >= 100) {
+      navCh2.classList.remove('locked-nav');
+      navCh2.innerHTML = `
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z M5 13.18v4l7 3.82 7-3.82v-4L12 17l-7-3.82z"/></svg>
+        المستوى الثاني ✨
+      `;
+    } else {
+      navCh2.classList.add('locked-nav');
+      navCh2.innerHTML = `
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        المستوى الثاني 🔒
+      `;
+    }
+  }
+
   function navigateTo(target) {
     if (isInteracting) return;
+    if (target === 'chapter2' && !state.level1Completed && state.bond < 100) {
+      alert('يجب إكمال نمو التنين بنسبة 100% لفتح المستوى الثاني!');
+      return;
+    }
     activeScreen = target;
     renderCurrentScreen();
     document.querySelectorAll('.nav-item').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.target === target);
     });
     bottomNav.classList.toggle('show', state.hatched);
+    updateNavState();
   }
 
   function renderCurrentScreen() {
@@ -507,20 +537,20 @@
 
   /* ============ 1. Egg Screen ============ */
   function renderEggScreen() {
-    const eggStageNum = state.warmth >= 6 ? 3 : (state.warmth >= 3 ? 2 : 1);
+    const eggStageNum = state.warmth >= MAX_EGG_WARMTH ? 3 : (state.warmth >= 4 ? 2 : 1);
 
     screenView.innerHTML = `
-      <div class="card-kicker">CHAPTER I &middot; EGG STAGE ${eggStageNum}/3</div>
+      <div class="card-kicker">المرحلة ${eggStageNum} من 3 (الفقس)</div>
       <h1 class="card-title">بيضة أزقة الغابة</h1>
       <div class="card-divider"></div>
       <p class="narrative-p">
-        عثرتِ بين أشجار الغابة الممنوعة على بيضة تنين نادرة. البيضة تتجاوب مع طاقاتكِ وتتطور عبر ثلاث مراحل سحرية حتى تتشقق القشرة.
+        عثرتِ بين أشجار الغابة الممنوعة على بيضة تنين نادرة. البيضة تتجاوب مع طاقاتكِ وتتطور عبر التدفئة حتى تظهر  وتتشقق القشرة للفقس.
       </p>
       <div class="dragon-display-frame">
         <img src="${getEggStageImage()}" alt="Egg Stage ${eggStageNum}" class="main-dragon-img" id="eggImg">
       </div>
       <div class="meter-box">
-        <div class="meter-head"><span>مستوى الدفء (المرحلة ${eggStageNum})</span><span id="warmthPercent">${Math.round((state.warmth/MAX_EGG_WARMTH)*100)}%</span></div>
+        <div class="meter-head"><span>مستوى الدفء</span><span id="warmthPercent">${Math.round((state.warmth/MAX_EGG_WARMTH)*100)}%</span></div>
         <div class="meter-track"><div class="meter-fill" id="meterFill" style="width:${(state.warmth/MAX_EGG_WARMTH)*100}%"></div></div>
       </div>
       <div class="action-grid">
@@ -556,7 +586,7 @@
         statusHint.textContent = HINTS_TEXT[Math.min(state.warmth, HINTS_TEXT.length-1)];
 
         if (state.warmth >= MAX_EGG_WARMTH) {
-          statusHint.textContent = 'تشققت البيضة بالكامل! جاري الفقس... 🐉';
+          statusHint.textContent = 'ظهرت وتشققت البيضة بالكامل! جاري الفقس... 🐉';
           setTimeout(() => navigateTo('hatching'), 1200);
         }
       });
@@ -567,8 +597,8 @@
   function renderHatchingScreen() {
     const sp = getCurrentSpecies();
     screenView.innerHTML = `
-      <div class="card-kicker">SPECIES UNLOCKED</div>
-      <h1 class="card-title">فقست البيضة السحرية!</h1>
+      <div class="card-kicker">تم الفقس بنجاح</div>
+      <h1 class="card-title">تم فقس التنين الصغير!</h1>
       <div class="card-divider"></div>
       <div class="dragon-display-frame">
         <img src="${sp.images.baby}" alt="${sp.name}" class="main-dragon-img">
@@ -582,7 +612,7 @@
         <input type="text" id="nameInput" class="luxury-input" maxlength="18" placeholder="اسم التنين..." value="${state.dragonName}">
       </div>
       <div style="text-align:center;">
-        <button class="btn-action" id="saveNameBtn" style="margin:0 auto;">تأكيد وإضافة للسجل </button>
+        <button class="btn-action" id="saveNameBtn" style="margin:0 auto;">تأكيد وبدء التربية ✨</button>
       </div>
     `;
 
@@ -590,6 +620,7 @@
       const val = document.getElementById('nameInput').value.trim();
       state.dragonName = val || sp.name;
       state.hatched = true;
+      state.stage = 'baby';
       
       if (!state.unlockedSpecies.includes(sp.id)) {
         state.unlockedSpecies.push(sp.id);
@@ -600,16 +631,20 @@
     });
   }
 
-  /* ============ 3. Dragon Main Screen (Updated with 5-limit & 5s sleep) ============ */
+  /* ============ 3. Dragon Main Screen ============ */
   function renderDragonScreen() {
     const sp = getCurrentSpecies();
-    
-    if (state.bond >= 75) state.stage = 'adult';
-    else if (state.bond >= 35) state.stage = 'teen';
-    else state.stage = 'baby';
+    state.stage = getDragonStage();
 
-    const currentImg = sp.images[state.stage] || sp.images.baby;
+    const currentImg = sp.images[state.stage];
+    const isFullyGrown = state.bond >= 100;
     
+    const stageTitles = { 
+      baby: 'تنين صغير (BABY)', 
+      teen: 'تنين يافع (TEEN)', 
+      adult: 'تنين بالغ ومكتمل النمو (ADULT)' 
+    };
+
     const equippedItem = STORE_ITEMS.find(i => i.id === state.equipped);
     const badgeHTML = equippedItem ? `
       <div class="equipped-badge">
@@ -618,12 +653,8 @@
       </div>
     ` : '';
 
-    let stageLabel = 'صغير (Baby)';
-    if (state.stage === 'teen') stageLabel = 'يافع (Teen)';
-    if (state.stage === 'adult') stageLabel = 'بالغ (Adult)';
-
     screenView.innerHTML = `
-      <div class="card-kicker">STAGE: ${stageLabel}</div>
+      <div class="card-kicker" id="stageKicker">المرحلة: ${stageTitles[state.stage]}</div>
       <h1 class="card-title">${state.dragonName}</h1>
       <div class="card-divider"></div>
       
@@ -637,26 +668,26 @@
       </div>
 
       <div class="meter-box">
-        <div class="meter-head"><span>مستوى الرابطة والنمو</span><span id="bondPercent">${state.bond}%</span></div>
+        <div class="meter-head"><span>نسبة النمو والتطور</span><span id="bondPercent">${state.bond}%</span></div>
         <div class="meter-track"><div class="meter-fill bond" id="bondFill" style="width:${state.bond}%"></div></div>
       </div>
 
       <div class="action-grid" id="careActions">
-        <button class="btn-action" data-type="pet">
+        <button class="btn-action" data-type="pet" ${isFullyGrown ? 'disabled' : ''}>
           <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-          ملاطفة 
+          ملاطفة
         </button>
-        <button class="btn-action" data-type="play">
+        <button class="btn-action" data-type="play" ${isFullyGrown ? 'disabled' : ''}>
           <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-          لعب وتدريب 
+          لعب وتدريب
         </button>
-        <button class="btn-action" data-type="feed">
+        <button class="btn-action" data-type="feed" ${isFullyGrown ? 'disabled' : ''}>
           <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.46 3.9 3.45 4.38l-.95 7.62h3l-.95-7.62C9.54 12.9 11 11.12 11 9zm7-7v12h2V2h-2z"/></svg>
-          إطعام 
+          إطعام
         </button>
       </div>
       
-      <div class="status-hint" id="careHint">اعتني بتنينك لزيادة الرابطة ليصل لمرحلة البلوغ! ✨ (${actionClickCount}/5)</div>
+      <div class="status-hint" id="careHint">${isFullyGrown ? ' اكتمل نمو التنين 100%! أصبح بالتاً وتم فتح المستوى الثاني، لا يمكن إطعامه أكثر.' : `اطعميه واعتني به ليكبر عبر 3 مراحل حتى 100%! (${actionClickCount}/5)`}</div>
       <div class="timer-counter" id="timerCounter"></div>
     `;
 
@@ -665,65 +696,71 @@
     const dragonImg = document.getElementById('dragonImg');
     const bondFill = document.getElementById('bondFill');
     const bondPercent = document.getElementById('bondPercent');
+    const stageKicker = document.getElementById('stageKicker');
     const careBtns = Array.from(screenView.querySelectorAll('#careActions .btn-action'));
 
     function setButtonsState(disabled) {
-      careBtns.forEach(btn => btn.disabled = disabled);
+      careBtns.forEach(btn => btn.disabled = disabled || state.bond >= 100);
     }
 
     async function handleCareClick(type) {
-      if (isInteracting) return;
+      if (isInteracting || state.bond >= 100) return;
 
       actionClickCount++;
-      state.bond = Math.min(100, state.bond + 3);
-      addReward(2, 3);
+      state.bond = Math.min(100, state.bond + 10);
       
+      const prevStage = state.stage;
+      state.stage = getDragonStage();
+
+      addReward(2, 3);
+      saveState();
+
+      // تحديث العناصر في الصفحة فوراً
       bondFill.style.width = state.bond + '%';
       bondPercent.textContent = state.bond + '%';
+      stageKicker.textContent = `المرحلة: ${stageTitles[state.stage]}`;
 
-      // حركة سريعة للأنيميشن عند كل ضغطة
-      dragonImg.classList.add('action-anim');
-      setTimeout(() => dragonImg.classList.remove('action-anim'), 300);
+      if (prevStage !== state.stage) {
+        updateImageWithAnimation(dragonImg, sp.images[state.stage]);
+      } else {
+        dragonImg.classList.add('action-anim');
+        setTimeout(() => dragonImg.classList.remove('action-anim'), 300);
+      }
 
       let actionText = '';
       if (type === 'feed') actionText = 'استمتع بالوجبة الشهية! ';
       else if (type === 'play') actionText = 'قفز ولعب بحماس! ';
       else actionText = 'شعر بالود والدفء... ';
 
-      // التحقق من الانتقال لمرحلة نمو جديدة بتأثير أنيميشن للـ image
-      const oldStage = state.stage;
-      if (state.bond >= 75) state.stage = 'adult';
-      else if (state.bond >= 35) state.stage = 'teen';
-
-      if (oldStage !== state.stage) {
-        updateImageWithAnimation(dragonImg, sp.images[state.stage]);
+      if (state.bond >= 100) {
+        state.level1Completed = true;
+        saveState();
+        updateNavState();
+        renderDragonScreen(); // إعادة رسم الشاشة لإغلاق الأزرار بالكامل
+        alert(' مبروك! اكتمل نمو تنينك بنسبة 100% وأصبح تنينًا بالغًا (ADULT)! تم فتح المستوى الثاني بنجاح.');
+        return;
       }
 
-      // إذا وصلنا إلى الحد الأقصى (5 مرات)
       if (actionClickCount >= 5) {
         isInteracting = true;
         setButtonsState(true);
-        careHint.textContent = `${actionText} التنين تعب ومحتاج ينام شوية... `;
+        careHint.textContent = `${actionText} التنين تعب ومحتاج ينام شوية... 💤`;
         dragonImg.classList.add('sleep-anim');
 
-        // عداد 5 ثوانٍ للنوم
         for (let sec = 5; sec > 0; sec--) {
           timerCounter.textContent = `💤 التنين في غفوة نوم... باقي ${sec} ثوانٍ`;
           await sleep(1000);
         }
 
-        // إعادة التعيين بعد النوم
         actionClickCount = 0;
         isInteracting = false;
         dragonImg.classList.remove('sleep-anim');
         timerCounter.textContent = '';
-        careHint.textContent = 'صحى التنين ونشيط ومستعد للتفاعل  (0/5)';
+        careHint.textContent = 'صحى التنين ونشيط ومستعد للتفاعل ✨ (0/5)';
         setButtonsState(false);
       } else {
         careHint.textContent = `${actionText} (${actionClickCount}/5)`;
       }
-
-      saveState();
     }
 
     careBtns.forEach(btn => {
@@ -735,6 +772,7 @@
 
   /* ============ 4. Store Screen ============ */
   function renderStoreScreen() {
+    const isFullyGrown = state.bond >= 100;
     screenView.innerHTML = `
       <div class="card-kicker">DIAGON ALLEY MARKET</div>
       <h1 class="card-title">سوق الأدوات السحرية</h1>
@@ -745,10 +783,17 @@
           const isEquipped = state.equipped === item.id;
           let btnText = 'شراء';
           let btnClass = 'btn-store';
-          
-          if (item.type === 'accessory') {
+          let isDisabled = false;
+
+          if (item.type === 'food' && isFullyGrown) {
+            btnText = 'مكتمل النمو';
+            isDisabled = true;
+          } else if (item.type === 'accessory') {
             if (isEquipped) { btnText = 'مُجهّز'; btnClass += ' equipped'; }
             else if (isOwned) { btnText = 'تجهيز الوسام'; }
+            else if (state.galleons < item.price) { isDisabled = true; }
+          } else if (state.galleons < item.price) {
+            isDisabled = true;
           }
 
           return `
@@ -756,7 +801,7 @@
               <img src="${item.img}" alt="${item.name}">
               <div class="item-title">${item.name}</div>
               <div class="item-cost">${item.price} GALLEONS</div>
-              <button class="${btnClass}" data-id="${item.id}" ${(!isOwned && state.galleons < item.price) ? 'disabled' : ''}>
+              <button class="${btnClass}" data-id="${item.id}" ${isDisabled ? 'disabled' : ''}>
                 ${btnText}
               </button>
             </div>
@@ -780,9 +825,14 @@
             state.equipped = id;
           }
         } else {
-          if (state.galleons >= item.price) {
+          if (state.galleons >= item.price && state.bond < 100) {
             state.galleons -= item.price;
             state.bond = Math.min(100, state.bond + 10);
+            state.stage = getDragonStage();
+            if (state.bond >= 100) {
+              state.level1Completed = true;
+              updateNavState();
+            }
           }
         }
         saveState(); updateLedgerUI(); renderStoreScreen();
@@ -801,7 +851,7 @@
           const isDiscovered = state.unlockedSpecies.includes(sp.id);
           return `
             <div class="archive-card ${isDiscovered ? '' : 'locked'}" data-id="${sp.id}">
-              <img src="${sp.images.adult}" alt="${sp.name}">
+              <img src="${sp.images.baby}" alt="${sp.name}">
               <div class="label">${isDiscovered ? sp.name : 'سلالة غامضة'}</div>
             </div>
           `;
@@ -816,7 +866,7 @@
         const sp = SPECIES_DATABASE.find(s => s.id === card.dataset.id);
         if (card.classList.contains('locked')) {
           archiveDetails.classList.add('show');
-          archiveDetails.innerHTML = `<h3>سلالة لم تُكتشف بعد</h3><p style="font-size:13px; color:var(--text-muted); font-family:'Marhey', cursive;">ستتم إضافتها تلقائيًا لهذه الموسوعة بمجرد العثور على بيضتها وتجميعها!</p>`;
+          archiveDetails.innerHTML = `<h3>سلالة لم تُكتشف بعد</h3><p style="font-size:13px; color:var(--text-muted); font-family:'Marhey', cursive;">ستتم إضافتها تلقائيًا لهذه الموسوعة بمجرد العثور على بيضتها!</p>`;
           return;
         }
         archiveDetails.classList.add('show');
@@ -829,17 +879,18 @@
     });
   }
 
-  /* ============ 6. Chapter 2 Screen ============ */
+  /* ============ 6. Chapter 2 Screen (Level 2) ============ */
   function renderChapter2Screen() {
     screenView.innerHTML = `
-      <div class="card-kicker">CHAPTER II &middot; COMING SOON</div>
-      <h1 class="card-title">وادي أشتار السحري</h1>
+      <div class="card-kicker">LEVEL 2 &middot; UNLOCKED</div>
+      <h1 class="card-title">المستوى الثاني: وادي أشتار</h1>
       <div class="card-divider"></div>
       <div class="dragon-display-frame">
-        <p style="color:var(--gold-bright); font-size:14px; font-family:'Marhey', cursive;">[ رحلة الاستكشاف القادمة ]</p>
+        <p style="color:var(--gold-bright); font-size:15px; font-family:'Marhey', cursive; text-align:center;">[ قيد التطوير والإضافة قريباً 🚀 ]</p>
       </div>
       <p class="narrative-p" style="text-align:center;">
-        المغامرة تنتظر ${state.dragonName || 'تنينك'} لخوض مواجهات مع مخلوقات سحرية أعتى واستكشاف أسرار المحميات القديمة...
+        تهانينا! لقد أتممت تربية وتكبير تنينك بنجاح حتى أصبح تنينًا بالغًا <br>
+        المغامرة القادمة ستتضمن مواجهات ومحميات جديدة سيتم إضافتها في التحديث القادم!
       </p>
     `;
   }
@@ -888,6 +939,7 @@
     appShell.classList.add('show');
     mainCard.classList.add('reveal');
     updateLedgerUI();
+    updateNavState();
     navigateTo(state.hatched ? 'dragon' : 'egg');
     if (state.hatched) bottomNav.classList.add('show');
   }
