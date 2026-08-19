@@ -27,6 +27,10 @@
     --text-muted: #9fa8b6;
     --ruby-alert: #ff4d6d;
     --magical-flame: #e76f51;
+    --rarity-common: #7fd8a0;
+    --rarity-uncommon: #3a86ff;
+    --rarity-rare: #f3c677;
+    --rarity-rare-glow: rgba(243, 198, 119, 0.45);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -49,6 +53,23 @@
 
   .svg-icon {
     width: 20px; height: 20px; fill: currentColor; display: inline-block; vertical-align: middle;
+  }
+
+  /* Ambient Ember Field */
+  #emberField {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  }
+  .ember {
+    position: absolute; bottom: -20px; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--gold-bright); box-shadow: 0 0 8px 2px var(--gold-glow), 0 0 2px var(--magical-flame);
+    opacity: 0; animation-name: emberRise; animation-timing-function: ease-in; animation-iteration-count: infinite;
+  }
+  @keyframes emberRise {
+    0% { transform: translateY(0) translateX(0) scale(0.6); opacity: 0; }
+    8% { opacity: 0.85; }
+    50% { transform: translateY(-52vh) translateX(var(--drift, 20px)) scale(1); }
+    92% { opacity: 0.5; }
+    100% { transform: translateY(-100vh) translateX(calc(var(--drift, 20px) * 2)) scale(0.3); opacity: 0; }
   }
 
   /* Cinema Intro */
@@ -195,6 +216,16 @@
   }
   .btn-action[disabled] { opacity: 0.35; cursor: not-allowed; border-color: var(--text-muted); color: var(--text-muted); }
 
+  .btn-expedition {
+    background: linear-gradient(135deg, rgba(212, 163, 89, 0.2), rgba(58, 134, 255, 0.2));
+    border: 1.5px solid var(--gold-bright);
+    box-shadow: 0 0 15px var(--gold-glow);
+    margin-top: 10px;
+  }
+  .btn-expedition:hover:not([disabled]) {
+    background: var(--gold-bright); color: #000;
+  }
+
   .status-hint { font-family: 'Marhey', cursive; font-size: 13px; color: var(--gold-bright); text-align: center; margin-top: 14px; min-height: 22px; }
   .timer-counter { color: var(--ruby-alert); font-weight: 700; font-size: 14px; text-align: center; margin-top: 6px; font-family: 'Marhey', cursive; }
 
@@ -257,13 +288,122 @@
   .nav-item.locked-nav { opacity: 0.4; cursor: not-allowed; border-color: #555; }
   .nav-item.locked-nav:hover { transform: none; background: rgba(19, 24, 34, 0.9); color: var(--text-muted); border-color: #555; }
 
+  /* Danger Reset Button + Confirmation Modal */
+  .btn-reset-danger {
+    position: fixed; left: 14px; bottom: 18px; z-index: 60;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(19, 24, 34, 0.92); border: 2px solid var(--ruby-alert); color: var(--ruby-alert);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(255, 77, 109, 0.35), inset 0 0 8px rgba(255, 77, 109, 0.15);
+    transition: all 0.3s ease; opacity: 0; pointer-events: none;
+  }
+  .btn-reset-danger.show { opacity: 1; pointer-events: auto; }
+  .btn-reset-danger:hover { background: var(--ruby-alert); color: #0b0e14; transform: scale(1.08) rotate(-10deg); box-shadow: 0 6px 22px rgba(255, 77, 109, 0.55); }
+  .btn-reset-danger svg { width: 21px; height: 21px; fill: currentColor; }
+
+  .reset-modal-overlay {
+    position: fixed; inset: 0; z-index: 200; background: rgba(5, 6, 10, 0.82); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .reset-modal-overlay.show { display: flex; }
+  .reset-modal-box {
+    max-width: 380px; width: 100%; background: var(--parchment-bg); border: 2px solid var(--ruby-alert);
+    border-radius: 20px; padding: 30px 24px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 30px rgba(255, 77, 109, 0.25);
+    animation: modalPop 0.3s ease;
+  }
+  @keyframes modalPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+  .reset-modal-icon { font-size: 34px; margin-bottom: 10px; }
+  .reset-modal-box h3 { font-family: 'Aref Ruqaa', serif; font-size: 22px; color: var(--ruby-alert); margin-bottom: 10px; }
+  .reset-modal-box p { font-size: 13.5px; color: var(--text-muted); line-height: 1.85; margin-bottom: 22px; font-weight: 300; }
+  .reset-modal-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn-danger-confirm { border-color: var(--ruby-alert); color: var(--ruby-alert); }
+  .btn-danger-confirm:hover { background: var(--ruby-alert); color: #0b0e14; box-shadow: 0 8px 20px rgba(255,77,109,0.4); }
+
+  /* Rarity Badges */
+  .rarity-badge {
+    display: inline-block; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 1.5px;
+    padding: 3px 10px; border-radius: 20px; border: 1px solid currentColor; text-transform: uppercase;
+  }
+  .rarity-badge.common { color: var(--rarity-common); background: rgba(127, 216, 160, 0.12); }
+  .rarity-badge.uncommon { color: var(--rarity-uncommon); background: rgba(58, 134, 255, 0.12); }
+  .rarity-badge.rare { color: var(--rarity-rare); background: rgba(243, 198, 119, 0.14); box-shadow: 0 0 10px var(--rarity-rare-glow); }
+
+  .archive-card.rarity-common { border-color: rgba(127, 216, 160, 0.35); }
+  .archive-card.rarity-uncommon { border-color: rgba(58, 134, 255, 0.35); }
+  .archive-card.rarity-rare { border-color: rgba(243, 198, 119, 0.55); box-shadow: 0 0 14px rgba(243, 198, 119, 0.15); }
+  .archive-card .count-badge {
+    position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.75); color: var(--gold-bright);
+    font-family: 'Cinzel', serif; font-size: 10px; padding: 2px 7px; border-radius: 10px; border: 1px solid var(--border-gold);
+  }
+  .archive-card { position: relative; }
+
+  /* Level 2 - Egg Nursery */
+  .egg-shop-box {
+    display: flex; align-items: center; gap: 16px; background: rgba(0,0,0,0.45);
+    border: 1.5px solid var(--border-gold); border-radius: 18px; padding: 16px; margin: 18px 0;
+  }
+  .egg-shop-box img { width: 64px; height: 64px; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6)); }
+  .egg-shop-box .egg-shop-info { flex: 1; }
+  .egg-shop-box .egg-shop-info h4 { font-family: 'Aref Ruqaa', serif; font-size: 17px; color: var(--gold-bright); margin-bottom: 4px; }
+  .egg-shop-box .egg-shop-info p { font-size: 12px; color: var(--text-muted); line-height: 1.6; font-weight: 300; }
+
+  .hatch-reveal-box {
+    margin: 16px 0; background: rgba(0,0,0,0.55); border: 1.5px solid var(--border-gold); border-radius: 16px;
+    padding: 18px; text-align: center; animation: modalPop 0.4s ease;
+  }
+  .hatch-reveal-box img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.7)); }
+  .hatch-reveal-box h4 { font-family: 'Aref Ruqaa', serif; font-size: 20px; color: var(--gold-bright); margin: 6px 0 4px; }
+  .hatch-reveal-box .hatch-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-family: 'Marhey', cursive; }
+  .hatch-reveal-box.rare-pull { border-color: var(--rarity-rare); box-shadow: 0 0 30px var(--rarity-rare-glow); }
+  .hatch-reveal-box.rare-pull img { animation: rareGlowPulse 1.4s ease-in-out infinite; }
+  @keyframes rareGlowPulse {
+    0%, 100% { filter: drop-shadow(0 8px 16px rgba(0,0,0,0.7)) drop-shadow(0 0 0px var(--rarity-rare-glow)); }
+    50% { filter: drop-shadow(0 8px 16px rgba(0,0,0,0.7)) drop-shadow(0 0 22px var(--rarity-rare-glow)); }
+  }
+  .sparkle-burst { position: relative; }
+  .sparkle-burst::before, .sparkle-burst::after {
+    content: '✦'; position: absolute; color: var(--rarity-rare); font-size: 18px;
+    animation: sparkleFloat 1.6s ease-out infinite;
+  }
+  .sparkle-burst::before { top: -6px; left: 10%; animation-delay: 0.1s; }
+  .sparkle-burst::after { bottom: -6px; right: 10%; animation-delay: 0.5s; }
+  @keyframes sparkleFloat {
+    0% { opacity: 0; transform: translateY(0) scale(0.5) rotate(0deg); }
+    30% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-24px) scale(1.1) rotate(90deg); }
+  }
+  .egg-shake { animation: eggShakeAnim 0.5s ease-in-out infinite; }
+  @keyframes eggShakeAnim {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-8deg); }
+    75% { transform: rotate(8deg); }
+  }
+
+  .mini-collection-strip { margin-top: 22px; }
+  .mini-collection-strip .strip-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .mini-collection-strip .strip-head span { font-family: 'Marhey', cursive; font-size: 13px; color: var(--text-muted); }
+  .mini-collection-strip .strip-head b { color: var(--gold-bright); font-family: 'Cinzel', serif; }
+
+  /* Level-up flash */
+  .medallion.level-flash { animation: levelFlashAnim 0.9s ease; }
+  @keyframes levelFlashAnim {
+    0% { box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 0 10px var(--gold-glow); }
+    35% { box-shadow: 0 0 30px 6px var(--gold-glow), inset 0 0 16px var(--gold-bright); transform: scale(1.08); }
+    100% { box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 0 10px var(--gold-glow); transform: scale(1); }
+  }
+
   @media (max-width: 480px) {
     .grimoire-card { padding: 26px 16px 20px; }
     .catalog-grid, .archive-grid { grid-template-columns: 1fr 1fr; }
+    .egg-shop-box { flex-direction: column; text-align: center; }
   }
 </style>
 </head>
 <body>
+
+  <!-- Ambient Ember Field -->
+  <div id="emberField"></div>
 
   <!-- Cinema Intro Window -->
   <div class="cinema" id="cinema">
@@ -322,6 +462,24 @@
     </button>
   </nav>
 
+  <!-- Danger Reset Button -->
+  <button class="btn-reset-danger" id="resetGameBtn" title="إعادة القصة من البداية" aria-label="إعادة القصة من البداية">
+    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+  </button>
+
+  <!-- Reset Confirmation Modal -->
+  <div class="reset-modal-overlay" id="resetModalOverlay">
+    <div class="reset-modal-box">
+      <div class="reset-modal-icon">⚠️</div>
+      <h3>إعادة القصة من الصفر؟</h3>
+      <p>هيتم حذف تنينك، مقتنياتك، وموسوعة السلالات بالكامل، وهتبدأ القصة تاني من مشهد الافتتاح والفيديو من الأول. القرار ده مفيهوش تراجع.</p>
+      <div class="reset-modal-actions">
+        <button class="btn-action" id="cancelResetBtn">لا، رجعيني</button>
+        <button class="btn-action btn-danger-confirm" id="confirmResetBtn">نعم، امسحي كل حاجة</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 const introBGM = new Audio('The_Sleeping_Grove.mp3');
 introBGM.loop = true;
@@ -336,11 +494,19 @@ document.addEventListener('click', () => {
   const MAX_EGG_WARMTH = 9;
   const XP_LEVEL_STEP = 50;
 
+  // إعدادات رحلات الاستكشاف لكسب الجاليونات بعد البلوغ
+  const EXPEDITIONS = [
+    { id: 'forest', name: 'جولة في أطراف الغابة الممنوعة', duration: 5, rewardGalleons: 25, rewardXP: 10 },
+    { id: 'cave',   name: 'استكشاف الكهوف الكريستالية',  duration: 10, rewardGalleons: 55, rewardXP: 25 },
+    { id: 'peak',   name: 'تحليق فوق جبال التنانين',    duration: 15, rewardGalleons: 100, rewardXP: 50 }
+  ];
+
   const SPECIES_DATABASE = [
     { 
       id: 'horntail',  
       name: 'القرن المجرى الأملس', 
       english: 'Hungarian Horntail',
+      rarity: 'rare',
       images: { baby: 'Horntail-baby.png', teen: 'Horntail-teen.png', adult: 'Horntail-adult.png' },
       desc: 'أخطر وأشرس أنواع التنانين؛ يمتلك قشورًا سوداء، وعيونًا صفراء، وأشواكًا برونزية على طول ذيله الحاد.' 
     },
@@ -348,6 +514,7 @@ document.addEventListener('click', () => {
       id: 'ironbelly',  
       name: 'الحديدى الأوكراني', 
       english: 'Ukrainian Ironbelly',
+      rarity: 'rare',
       images: { baby: 'Ukrainian-baby.png', teen: 'Ukrainian-teen.png', adult: 'Ukrainian-adult.png' },
       desc: 'أضخم سلالات التنانين المسجلة، بوزن يصل إلى 6 أطنان وقشور معدنية رمادية سميكة كالصلب.' 
     },
@@ -355,6 +522,7 @@ document.addEventListener('click', () => {
       id: 'ridgeback',   
       name: 'النرويجي ذو العرف المحدب',  
       english: 'Norwegian Ridgeback',
+      rarity: 'uncommon',
       images: { baby: 'Norwegian-baby.png', teen: 'Norwegian-teen.png', adult: 'Norwegian-adult.png' },
       desc: 'يشبه التنين "نوربرت"، يمتلك بروزات بارزة داكنة على طول ظهره ويبدأ بإطلاق النار في سن مبكرة.' 
     },
@@ -362,6 +530,7 @@ document.addEventListener('click', () => {
       id: 'fireball', 
       name: 'الكرة النارية الصينية', 
       english: 'Chinese Fireball',
+      rarity: 'uncommon',
       images: { baby: 'Chinese-baby.png', teen: 'Chinese-teen.png', adult: 'Chinese-adult.png' },
       desc: 'تنين أحمر ناعم القشور وتحيط بوجهه شوك ذهبية، ويطلق كرات نارية كروية الشكل من منخريه.' 
     },
@@ -369,6 +538,7 @@ document.addEventListener('click', () => {
       id: 'shortsnout',  
       name: 'السويدي ذو الخرطوم القصير', 
       english: 'Swedish Short-Snout',
+      rarity: 'common',
       images: { baby: 'Swedish-baby.png', teen: 'Swedish-teen.png', adult: 'Swedish-adult.png' },
       desc: 'تنين أزرق فضي يعيش في الجبال المرتفعة، يطلق لهبًا أزرق شديد الحرارة يذيب الصخور.' 
     },
@@ -376,6 +546,7 @@ document.addEventListener('click', () => {
       id: 'welshgreen',  
       name: 'الأخضر الويلزي الشائع',  
       english: 'Common Welsh Green',
+      rarity: 'common',
       images: { baby: 'Welsh-baby.png', teen: 'Welsh-teen.png', adult: 'Welsh-adult.png' },
       desc: 'من أقل التنانين إثارة للمشاكل؛ يتغذى على الأغنام، وله زئير رنان ناعم الموسيقى.' 
     }
@@ -390,6 +561,15 @@ document.addEventListener('click', () => {
     { id: 'saddle',  name: 'سرج حارس',       img: 'Pack.png',   price: 45, type: 'accessory' },
     { id: 'crown',   name: 'تاج الإمبراطور',    img: 'Crown.png',  price: 60, type: 'accessory' }
   ];
+
+  /* ===== Level 2: Dragon Nursery / Egg Market config ===== */
+  const RARITY_META = {
+    common:   { label: 'شائع',        weight: 32 },
+    uncommon: { label: 'متوسط الندرة', weight: 14 },
+    rare:     { label: 'نادر',        weight: 4  }
+  };
+  const MYSTERY_EGG_PRICE = 40;
+  const MYSTERY_EGG_IMAGE = 'Egg2.png';
 
   const HINTS_TEXT = [
     'البيضة باردة... تحتاج لدفء يديك ',
@@ -435,14 +615,15 @@ document.addEventListener('click', () => {
         unlockedSpecies: parsed.unlockedSpecies || [],
         owned: parsed.owned || [],
         equipped: parsed.equipped || null,
-        level1Completed: !!parsed.level1Completed
+        level1Completed: !!parsed.level1Completed,
+        dragonCounts: parsed.dragonCounts || {}
       };
     } catch(e) {
       return {
         warmth: 0, xp: 0, galleons: 0, introSeen: false, hatched: false,
         speciesId: getRandomElement(SPECIES_DATABASE).id,
         dragonName: '', stage: 'baby', bond: 0, unlockedSpecies: [], owned: [], equipped: null,
-        level1Completed: false
+        level1Completed: false, dragonCounts: {}
       };
     }
   }
@@ -455,6 +636,24 @@ document.addEventListener('click', () => {
   let activeScreen = 'egg';
   let isInteracting = false;
   let actionClickCount = 0;
+  let lastHatchResult = null;
+
+  // توافق مع الحفظ القديم: أي سلالة كانت مكتشفة سابقًا تُحسب كنسخة واحدة على الأقل
+  SPECIES_DATABASE.forEach(sp => {
+    if (state.unlockedSpecies.includes(sp.id) && !state.dragonCounts[sp.id]) {
+      state.dragonCounts[sp.id] = 1;
+    }
+  });
+
+  function pickRandomDragonByRarity() {
+    const roll = Math.random() * 100;
+    let cumulative = 0;
+    for (const sp of SPECIES_DATABASE) {
+      cumulative += RARITY_META[sp.rarity].weight;
+      if (roll <= cumulative) return sp;
+    }
+    return SPECIES_DATABASE[SPECIES_DATABASE.length - 1];
+  }
 
   function getCurrentSpecies() {
     return SPECIES_DATABASE.find(s => s.id === state.speciesId) || SPECIES_DATABASE[0];
@@ -484,8 +683,18 @@ document.addEventListener('click', () => {
   }
 
   function addReward(xp, galleons) {
+    const prevLevel = getLevel();
     state.xp += xp; state.galleons += galleons;
     saveState(); updateLedgerUI();
+    if (getLevel() > prevLevel) triggerLevelUpFlash();
+  }
+
+  function triggerLevelUpFlash() {
+    const medallion = xpVal.closest('.medallion');
+    if (!medallion) return;
+    medallion.classList.remove('level-flash');
+    void medallion.offsetWidth; // إعادة تشغيل الأنيميشن
+    medallion.classList.add('level-flash');
   }
 
   function updateImageWithAnimation(imgElement, newSrc) {
@@ -631,6 +840,7 @@ document.addEventListener('click', () => {
       if (!state.unlockedSpecies.includes(sp.id)) {
         state.unlockedSpecies.push(sp.id);
       }
+      state.dragonCounts[sp.id] = (state.dragonCounts[sp.id] || 0) + 1;
 
       saveState(); addReward(10, 20);
       navigateTo('dragon');
@@ -657,6 +867,13 @@ document.addEventListener('click', () => {
         <img src="${equippedItem.img}" alt="${equippedItem.name}">
         <span>${equippedItem.name}</span>
       </div>
+    ` : '';
+
+    const expeditionBtnHTML = isFullyGrown ? `
+      <button class="btn-action btn-expedition" id="startExpeditionBtn">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2L2 19h20L12 2zm0 3.8L18.8 17H5.2L12 5.8z"/></svg>
+        إرسال في رحلة استكشافية 🗺️
+      </button>
     ` : '';
 
     screenView.innerHTML = `
@@ -691,9 +908,10 @@ document.addEventListener('click', () => {
           <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.46 3.9 3.45 4.38l-.95 7.62h3l-.95-7.62C9.54 12.9 11 11.12 11 9zm7-7v12h2V2h-2z"/></svg>
           إطعام
         </button>
+        ${expeditionBtnHTML}
       </div>
       
-      <div class="status-hint" id="careHint">${isFullyGrown ? ' اكتمل نمو التنين 100%! أصبح بالتاً وتم فتح المستوى الثاني، لا يمكن إطعامه أكثر.' : `اطعميه واعتني به ليكبر عبر 3 مراحل حتى 100%! (${actionClickCount}/5)`}</div>
+      <div class="status-hint" id="careHint">${isFullyGrown ? ' أصلحي مستقبلك بالاستكشاف! تنينك بالغ ويمكنه كسب الجاليونات من الرحلات ✨' : `اطعميه واعتني به ليكبر عبر 3 مراحل حتى 100%! (${actionClickCount}/5)`}</div>
       <div class="timer-counter" id="timerCounter"></div>
     `;
 
@@ -706,7 +924,35 @@ document.addEventListener('click', () => {
     const careBtns = Array.from(screenView.querySelectorAll('#careActions .btn-action'));
 
     function setButtonsState(disabled) {
-      careBtns.forEach(btn => btn.disabled = disabled || state.bond >= 100);
+      careBtns.forEach(btn => btn.disabled = disabled || (state.bond >= 100 && btn.id !== 'startExpeditionBtn'));
+    }
+
+    // إضافة تشغيل رحلة الاستكشاف عند البلوغ
+    const startExpeditionBtn = document.getElementById('startExpeditionBtn');
+    if (startExpeditionBtn) {
+      startExpeditionBtn.addEventListener('click', async () => {
+        if (isInteracting) return;
+        isInteracting = true;
+        setButtonsState(true);
+
+        const exp = getRandomElement(EXPEDITIONS);
+        careHint.textContent = `انطلق ${state.dragonName} في "${exp.name}" لجلب الجاليونات... 🦅`;
+        dragonImg.classList.add('action-anim');
+
+        for (let sec = exp.duration; sec > 0; sec--) {
+          timerCounter.textContent = `⏳ التنين في الرحلة... متبقي ${sec} ثوانٍ`;
+          await sleep(1000);
+        }
+
+        dragonImg.classList.remove('action-anim');
+        timerCounter.textContent = '';
+        
+        addReward(exp.rewardXP, exp.rewardGalleons);
+        careHint.textContent = `عاد ${state.dragonName} بنجاح ومعه ${exp.rewardGalleons} جاليون! 💰✨`;
+        
+        isInteracting = false;
+        setButtonsState(false);
+      });
     }
 
     async function handleCareClick(type) {
@@ -742,8 +988,8 @@ document.addEventListener('click', () => {
         state.level1Completed = true;
         saveState();
         updateNavState();
-        renderDragonScreen(); // إعادة رسم الشاشة لإغلاق الأزرار بالكامل
-        alert(' مبروك! اكتمل نمو تنينك بنسبة 100% وأصبح تنينًا بالغًا (ADULT)! تم فتح المستوى الثاني بنجاح.');
+        renderDragonScreen(); // إعادة رسم الشاشة لإغلاق الأزرار بالكامل وإظهار زر الاستكشاف
+        alert(' مبروك! اكتمل نمو تنينك بنسبة 100% وأصبح تنينًا بالغًا (ADULT)! تم فتح زر رحلات الاستكشاف لكسب الجاليونات والمستوى الثاني.');
         return;
       }
 
@@ -770,9 +1016,11 @@ document.addEventListener('click', () => {
     }
 
     careBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        handleCareClick(btn.dataset.type);
-      });
+      if (btn.id !== 'startExpeditionBtn') {
+        btn.addEventListener('click', () => {
+          handleCareClick(btn.dataset.type);
+        });
+      }
     });
   }
 
@@ -848,17 +1096,28 @@ document.addEventListener('click', () => {
 
   /* ============ 5. Archive Screen ============ */
   function renderCollectionScreen() {
+    const totalUnique = SPECIES_DATABASE.filter(sp => (state.dragonCounts[sp.id] || 0) > 0).length;
+    const totalDragons = Object.values(state.dragonCounts).reduce((a, b) => a + b, 0);
+    const completionPct = Math.round((totalUnique / SPECIES_DATABASE.length) * 100);
+
     screenView.innerHTML = `
       <div class="card-kicker">MAGIZOOLOGY ARCHIVE</div>
       <h1 class="card-title">موسوعة التنانين</h1>
       <div class="card-divider"></div>
+      <div class="meter-box">
+        <div class="meter-head"><span>سلالات مكتشفة</span><span>${totalUnique} / ${SPECIES_DATABASE.length} &middot; ${totalDragons} تنين بالإجمالي</span></div>
+        <div class="meter-track"><div class="meter-fill bond" style="width:${completionPct}%"></div></div>
+      </div>
       <div class="archive-grid">
         ${SPECIES_DATABASE.map(sp => {
-          const isDiscovered = state.unlockedSpecies.includes(sp.id);
+          const count = state.dragonCounts[sp.id] || 0;
+          const isDiscovered = count > 0;
           return `
-            <div class="archive-card ${isDiscovered ? '' : 'locked'}" data-id="${sp.id}">
+            <div class="archive-card ${isDiscovered ? 'rarity-' + sp.rarity : 'locked'}" data-id="${sp.id}">
+              ${isDiscovered ? `<span class="count-badge">×${count}</span>` : ''}
               <img src="${sp.images.baby}" alt="${sp.name}">
               <div class="label">${isDiscovered ? sp.name : 'سلالة غامضة'}</div>
+              ${isDiscovered ? `<span class="rarity-badge ${sp.rarity}" style="margin-top:6px;">${RARITY_META[sp.rarity].label}</span>` : ''}
             </div>
           `;
         }).join('')}
@@ -872,33 +1131,120 @@ document.addEventListener('click', () => {
         const sp = SPECIES_DATABASE.find(s => s.id === card.dataset.id);
         if (card.classList.contains('locked')) {
           archiveDetails.classList.add('show');
-          archiveDetails.innerHTML = `<h3>سلالة لم تُكتشف بعد</h3><p style="font-size:13px; color:var(--text-muted); font-family:'Marhey', cursive;">ستتم إضافتها تلقائيًا لهذه الموسوعة بمجرد العثور على بيضتها!</p>`;
+          archiveDetails.innerHTML = `<h3>سلالة لم تُكتشف بعد</h3><p style="font-size:13px; color:var(--text-muted); font-family:'Marhey', cursive;">ستتم إضافتها تلقائيًا لهذه الموسوعة بمجرد العثور على بيضتها، سواء بالفقس أو بشراء بيضة غامضة من المستوى الثاني!</p>`;
           return;
         }
+        const count = state.dragonCounts[sp.id] || 0;
         archiveDetails.classList.add('show');
         archiveDetails.innerHTML = `
           <h3>${sp.name}</h3>
           <div class="sub-title">${sp.english}</div>
-          <p style="font-size:14px; line-height:1.8; color:var(--text-primary); font-weight:300;">${sp.desc}</p>
+          <span class="rarity-badge ${sp.rarity}">${RARITY_META[sp.rarity].label}</span>
+          <p style="font-size:14px; line-height:1.8; color:var(--text-primary); font-weight:300; margin-top:10px;">${sp.desc}</p>
+          <p style="font-size:12px; color:var(--gold-bright); font-family:'Marhey', cursive; margin-top:8px;">لديكِ ${count} من هذه السلالة</p>
         `;
       });
     });
   }
 
-  /* ============ 6. Chapter 2 Screen (Level 2) ============ */
+  /* ============ 6. Chapter 2 Screen (Level 2) - Dragon Nursery ============ */
   function renderChapter2Screen() {
+    const totalUnique = SPECIES_DATABASE.filter(sp => (state.dragonCounts[sp.id] || 0) > 0).length;
+    const totalDragons = Object.values(state.dragonCounts).reduce((a, b) => a + b, 0);
+    const canAfford = state.galleons >= MYSTERY_EGG_PRICE;
+
     screenView.innerHTML = `
       <div class="card-kicker">LEVEL 2 &middot; UNLOCKED</div>
       <h1 class="card-title">المستوى الثاني: وادي أشتار</h1>
       <div class="card-divider"></div>
-      <div class="dragon-display-frame">
-        <p style="color:var(--gold-bright); font-size:15px; font-family:'Marhey', cursive; text-align:center;">[ قيد التطوير والإضافة قريباً 🚀 ]</p>
-      </div>
-      <p class="narrative-p" style="text-align:center;">
-        تهانينا! لقد أتممت تربية وتكبير تنينك بنجاح حتى أصبح تنينًا بالغًا <br>
-        المغامرة القادمة ستتضمن مواجهات ومحميات جديدة سيتم إضافتها في التحديث القادم!
+      <p class="narrative-p">
+        تهانينا! تنينك الأول أصبح بالغًا، وقادكِ نموه إلى وادي أشتار، موطن حضّانة سرية مليئة ببيوض غامضة لسلالات التنانين الست.
+        كل بيضة تخفي مفاجأة قد تكون سلالة شائعة، أو نادرة جدًا تستحق الفخر! اشتري بيضة، وخلي الحظ يقرر مين هيخرج منها.
       </p>
+
+      <div class="egg-shop-box">
+        <img src="${MYSTERY_EGG_IMAGE}" alt="بيضة غامضة">
+        <div class="egg-shop-info">
+          <h4>بيضة غامضة</h4>
+          <p>فرصة الحصول على سلالة نادرة موجودة، لكنها ضئيلة... جرّبي حظك!</p>
+        </div>
+        <button class="btn-action" id="buyEggBtn" ${(!canAfford || isInteracting) ? 'disabled' : ''}>
+          شراء (${MYSTERY_EGG_PRICE} غاليون)
+        </button>
+      </div>
+
+      <div id="hatchRevealBox">${lastHatchResult ? renderHatchRevealHTML(lastHatchResult) : ''}</div>
+
+      <div class="mini-collection-strip">
+        <div class="strip-head">
+          <span>ملخص الموسوعة</span>
+          <b>${totalUnique} / ${SPECIES_DATABASE.length} سلالة &middot; ${totalDragons} تنين</b>
+        </div>
+        <div class="archive-grid">
+          ${SPECIES_DATABASE.map(sp => {
+            const count = state.dragonCounts[sp.id] || 0;
+            const isDiscovered = count > 0;
+            return `
+              <div class="archive-card ${isDiscovered ? 'rarity-' + sp.rarity : 'locked'}">
+                ${isDiscovered ? `<span class="count-badge">×${count}</span>` : ''}
+                <img src="${sp.images.baby}" alt="${sp.name}">
+                <div class="label">${isDiscovered ? sp.name : 'سلالة غامضة'}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div style="text-align:center; margin-top:16px;">
+          <button class="btn-action" id="goCollectionBtn" style="margin:0 auto;">فتح الموسوعة الكاملة 📖</button>
+        </div>
+      </div>
     `;
+
+    const buyEggBtn = document.getElementById('buyEggBtn');
+    buyEggBtn.addEventListener('click', handleBuyMysteryEgg);
+    document.getElementById('goCollectionBtn').addEventListener('click', () => navigateTo('collection'));
+  }
+
+  function renderHatchRevealHTML(result) {
+    const { sp, isNew, count } = result;
+    const isRare = sp.rarity === 'rare';
+    return `
+      <div class="hatch-reveal-box ${isRare ? 'rare-pull' : ''}">
+        <div class="${isRare ? 'sparkle-burst' : ''}">
+          <img src="${sp.images.baby}" alt="${sp.name}">
+        </div>
+        <span class="rarity-badge ${sp.rarity}">${RARITY_META[sp.rarity].label}</span>
+        <h4>${sp.name}</h4>
+        <div class="hatch-sub">${sp.english}</div>
+        <div class="hatch-sub">${isNew ? '🎉 سلالة جديدة أُضيفت لموسوعتك!' : `لديكِ الآن ${count} من هذه السلالة`}</div>
+      </div>
+    `;
+  }
+
+  async function handleBuyMysteryEgg() {
+    if (isInteracting || state.galleons < MYSTERY_EGG_PRICE) return;
+    isInteracting = true;
+
+    const buyEggBtn = document.getElementById('buyEggBtn');
+    const shopImg = document.querySelector('.egg-shop-box img');
+    state.galleons -= MYSTERY_EGG_PRICE;
+    saveState(); updateLedgerUI();
+
+    if (buyEggBtn) { buyEggBtn.disabled = true; buyEggBtn.textContent = 'جاري الفقس...'; }
+    if (shopImg) shopImg.classList.add('egg-shake');
+
+    await sleep(1300);
+
+    const sp = pickRandomDragonByRarity();
+    const prevCount = state.dragonCounts[sp.id] || 0;
+    const isNew = prevCount === 0;
+    state.dragonCounts[sp.id] = prevCount + 1;
+    if (!state.unlockedSpecies.includes(sp.id)) state.unlockedSpecies.push(sp.id);
+    lastHatchResult = { sp, isNew, count: state.dragonCounts[sp.id] };
+
+    saveState();
+    addReward(isNew ? 15 : 5, 0);
+    isInteracting = false;
+    if (activeScreen === 'chapter2') renderChapter2Screen();
   }
 
   bottomNav.addEventListener('click', (e) => {
@@ -948,7 +1294,44 @@ document.addEventListener('click', () => {
     updateNavState();
     navigateTo(state.hatched ? 'dragon' : 'egg');
     if (state.hatched) bottomNav.classList.add('show');
+    resetGameBtn.classList.add('show');
   }
+
+  /* ============ Ambient Ember Field ============ */
+  function spawnEmberField() {
+    const field = document.getElementById('emberField');
+    const count = 14;
+    for (let i = 0; i < count; i++) {
+      const ember = document.createElement('span');
+      ember.className = 'ember';
+      const leftPos = Math.random() * 100;
+      const duration = 7 + Math.random() * 8;
+      const delay = Math.random() * 10;
+      const drift = (Math.random() * 60 - 30) + 'px';
+      ember.style.left = leftPos + '%';
+      ember.style.setProperty('--drift', drift);
+      ember.style.animationDuration = duration + 's';
+      ember.style.animationDelay = delay + 's';
+      field.appendChild(ember);
+    }
+  }
+  spawnEmberField();
+
+  /* ============ Danger Reset (Return to Beginning) ============ */
+  const resetGameBtn = document.getElementById('resetGameBtn');
+  const resetModalOverlay = document.getElementById('resetModalOverlay');
+  const cancelResetBtn = document.getElementById('cancelResetBtn');
+  const confirmResetBtn = document.getElementById('confirmResetBtn');
+
+  resetGameBtn.addEventListener('click', () => resetModalOverlay.classList.add('show'));
+  cancelResetBtn.addEventListener('click', () => resetModalOverlay.classList.remove('show'));
+  resetModalOverlay.addEventListener('click', (e) => {
+    if (e.target === resetModalOverlay) resetModalOverlay.classList.remove('show');
+  });
+  confirmResetBtn.addEventListener('click', () => {
+    try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+    location.reload();
+  });
 
   if (state.introSeen) {
     cinema.style.display = 'none';
