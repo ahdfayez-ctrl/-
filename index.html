@@ -437,10 +437,62 @@
     100% { box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 0 10px var(--gold-glow); transform: scale(1); }
   }
 
-  @media (max-width: 480px) {
+  /* ============ Mobile Responsiveness ============ */
+  @media (max-width: 600px) {
+    body { padding: 16px 10px 110px; }
+
     .grimoire-card { padding: 26px 16px 20px; }
     .catalog-grid, .archive-grid { grid-template-columns: 1fr 1fr; }
     .egg-shop-box { flex-direction: column; text-align: center; }
+    .egg-shop-box #buyEggBtn, .egg-shop-box .btn-action { width: 100%; justify-content: center; }
+
+    /* Top medallions: wrap instead of squeezing/overlapping on narrow screens */
+    .ledger-bar { flex-wrap: wrap; gap: 10px; }
+    .medallion { flex: 1 1 140px; padding: 8px 14px; }
+
+    /* Care/action buttons: stack full-width so labels never wrap mid-pill */
+    .action-grid { flex-direction: column; }
+    .action-grid .btn-action { width: 100%; justify-content: center; }
+
+    .dragon-display-frame { height: 200px; }
+    .equipped-badge { padding: 5px 10px; }
+    .equipped-badge span { font-size: 10px; }
+
+    /* Fixed-width inputs: shrink to fit small screens */
+    .luxury-input, .nursery-name-input { width: 100%; max-width: 240px; }
+
+    /* Bottom nav: reserve space on the left for the round reset button so tabs
+       never render underneath it, and let the 4 tabs share the row evenly
+       (with truncated labels) instead of overflowing/overlapping each other */
+    #bottomNav {
+      gap: 6px;
+      padding: 12px 10px 16px 78px;
+      justify-content: space-between;
+    }
+    .nav-item {
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 8px 6px;
+      font-size: 11px;
+      gap: 4px;
+    }
+    .nav-item .svg-icon { width: 16px; height: 16px; flex-shrink: 0; }
+    .nav-label {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-reset-danger { width: 42px; height: 42px; left: 10px; bottom: 16px; }
+  }
+
+  /* Extra-small phones: icons-only bottom nav to guarantee zero overlap */
+  @media (max-width: 360px) {
+    .nav-label { display: none; }
+    .nav-item { padding: 10px 4px; }
+    .nav-item .svg-icon { width: 20px; height: 20px; }
+    #bottomNav { padding-left: 68px; }
   }
 </style>
 </head>
@@ -490,19 +542,19 @@
   <nav id="bottomNav">
     <button class="nav-item" data-target="dragon">
       <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2L2 19h20L12 2zm0 3.8L18.8 17H5.2L12 5.8z"/></svg>
-      التنين
+      <span class="nav-label">التنين</span>
     </button>
     <button class="nav-item" data-target="store">
       <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3z"/></svg>
-      السوق
+      <span class="nav-label">السوق</span>
     </button>
     <button class="nav-item" data-target="collection">
       <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h2v8l2.5-1.5L13 12V4h5v16z"/></svg>
-      السجل
+      <span class="nav-label">السجل</span>
     </button>
     <button class="nav-item locked-nav" data-target="chapter2" id="navChapter2">
       <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-      المستوى الثاني 
+      <span class="nav-label">المستوى الثاني</span>
     </button>
   </nav>
 
@@ -797,13 +849,13 @@ document.addEventListener('click', () => {
       navCh2.classList.remove('locked-nav');
       navCh2.innerHTML = `
         <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z M5 13.18v4l7 3.82 7-3.82v-4L12 17l-7-3.82z"/></svg>
-        المستوى الثاني ✨
+        <span class="nav-label">المستوى الثاني ✨</span>
       `;
     } else {
       navCh2.classList.add('locked-nav');
       navCh2.innerHTML = `
         <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-        المستوى الثاني 🔒
+        <span class="nav-label">المستوى الثاني 🔒</span>
       `;
     }
   }
