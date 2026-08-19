@@ -1359,35 +1359,41 @@ document.addEventListener('click', () => {
           <div class="meter-track"><div class="meter-fill" id="ndWarmthFill" style="width:${pct}%"></div></div>
         </div>
         <div class="action-grid">
-          <button class="btn-action" id="ndWarmBtn">
+          <button class="btn-action" data-nd-care="warm">
             <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 23c6.075 0 11-4.925 11-11S12 2 12 2 1 6.925 1 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
-            تدفئة
+            تدفئة بالحرارة
+          </button>
+          <button class="btn-action" data-nd-care="sing">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            تعويذة غنائية
           </button>
         </div>
         <div class="status-hint" id="ndHint">${HINTS_TEXT[Math.min(nd.warmth, HINTS_TEXT.length-1)]}</div>
       </div>
     `;
 
-    document.getElementById('ndWarmBtn').addEventListener('click', () => {
-      if (isInteracting || nd.warmth >= MAX_EGG_WARMTH) return;
-      nd.warmth++;
-      addReward(3, 5);
-      saveState();
+    panel.querySelectorAll('[data-nd-care]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isInteracting || nd.warmth >= MAX_EGG_WARMTH) return;
+        nd.warmth++;
+        addReward(3, 5);
+        saveState();
 
-      const eggImgElem = document.getElementById('ndEggImg');
-      updateImageWithAnimation(eggImgElem, getNurseryEggImage(nd));
-      const p = Math.round((nd.warmth / MAX_EGG_WARMTH) * 100);
-      document.getElementById('ndWarmthFill').style.width = p + '%';
-      document.getElementById('ndWarmthPct').textContent = p + '%';
-      document.getElementById('ndHint').textContent = HINTS_TEXT[Math.min(nd.warmth, HINTS_TEXT.length-1)];
+        const eggImgElem = document.getElementById('ndEggImg');
+        updateImageWithAnimation(eggImgElem, getNurseryEggImage(nd));
+        const p = Math.round((nd.warmth / MAX_EGG_WARMTH) * 100);
+        document.getElementById('ndWarmthFill').style.width = p + '%';
+        document.getElementById('ndWarmthPct').textContent = p + '%';
+        document.getElementById('ndHint').textContent = HINTS_TEXT[Math.min(nd.warmth, HINTS_TEXT.length-1)];
 
-      // تحديث صورة التاب المصغّر
-      const tabImg = document.querySelector(`.nursery-tab[data-id="${nd.id}"] .tab-circle img`);
-      if (tabImg) tabImg.src = getNurseryEggImage(nd);
+        // تحديث صورة التاب المصغّر
+        const tabImg = document.querySelector(`.nursery-tab[data-id="${nd.id}"] .tab-circle img`);
+        if (tabImg) tabImg.src = getNurseryEggImage(nd);
 
-      if (nd.warmth >= MAX_EGG_WARMTH) {
-        setTimeout(() => handleNurseryHatch(nd), 900);
-      }
+        if (nd.warmth >= MAX_EGG_WARMTH) {
+          setTimeout(() => handleNurseryHatch(nd), 900);
+        }
+      });
     });
   }
 
@@ -1432,7 +1438,15 @@ document.addEventListener('click', () => {
             <div class="meter-track"><div class="meter-fill bond" id="ndBondFill" style="width:${nd.bond}%"></div></div>
           </div>
           ${isFullyGrown ? `
-            <div class="status-hint">🌟 وصل تنينك للنمو الكامل! ممكن تفتحي بيضة جديدة أو تتنقلي بين تنانينك من الأزرار اللي فوق.</div>
+            <div class="status-hint">🌟 وصل تنينك للنمو الكامل! ابعتيه في رحلة استكشافية عشان يجيبلك جاليونات.</div>
+            <div class="action-grid">
+              <button class="btn-action btn-expedition" id="ndExpeditionBtn">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2L2 19h20L12 2zm0 3.8L18.8 17H5.2L12 5.8z"/></svg>
+                إرسال في رحلة استكشافية 🗺️
+              </button>
+            </div>
+            <div class="status-hint" id="ndCareHint"></div>
+            <div class="timer-counter" id="ndTimerCounter"></div>
           ` : `
             <div class="action-grid" id="ndCareActions">
               <button class="btn-action" data-type="pet"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>ملاطفة</button>
@@ -1491,6 +1505,38 @@ document.addEventListener('click', () => {
         }
       });
     });
+
+    const expeditionBtn = document.getElementById('ndExpeditionBtn');
+    if (expeditionBtn) {
+      expeditionBtn.addEventListener('click', async () => {
+        if (isInteracting) return;
+        isInteracting = true;
+        expeditionBtn.disabled = true;
+
+        const careHint = document.getElementById('ndCareHint');
+        const timerCounter = document.getElementById('ndTimerCounter');
+        const dragonImg = document.getElementById('ndDragonImg');
+        const displayName = nd.name || sp.name;
+
+        const exp = getRandomElement(EXPEDITIONS);
+        if (careHint) careHint.textContent = `انطلق ${displayName} في "${exp.name}" لجلب الجاليونات... 🦅`;
+        if (dragonImg) dragonImg.classList.add('action-anim');
+
+        for (let sec = exp.duration; sec > 0; sec--) {
+          if (timerCounter) timerCounter.textContent = `⏳ التنين في الرحلة... متبقي ${sec} ثوانٍ`;
+          await sleep(1000);
+        }
+
+        if (dragonImg) dragonImg.classList.remove('action-anim');
+        if (timerCounter) timerCounter.textContent = '';
+
+        addReward(exp.rewardXP, exp.rewardGalleons);
+        if (careHint) careHint.textContent = `عاد ${displayName} بنجاح ومعه ${exp.rewardGalleons} جاليون! 💰✨`;
+
+        isInteracting = false;
+        if (document.getElementById('ndExpeditionBtn')) document.getElementById('ndExpeditionBtn').disabled = false;
+      });
+    }
   }
 
   bottomNav.addEventListener('click', (e) => {
