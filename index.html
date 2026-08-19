@@ -385,6 +385,50 @@
   .mini-collection-strip .strip-head span { font-family: 'Marhey', cursive; font-size: 13px; color: var(--text-muted); }
   .mini-collection-strip .strip-head b { color: var(--gold-bright); font-family: 'Cinzel', serif; }
 
+  /* Level 2 - Per-Egg Raising Tabs ("side buttons" for each purchased dragon) */
+  .nursery-tabs-section { margin: 20px 0 4px; }
+  .nursery-tabs-label { font-family: 'Marhey', cursive; font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px; }
+  .nursery-tabs-wrap {
+    display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; scroll-behavior: smooth;
+  }
+  .nursery-tabs-wrap::-webkit-scrollbar { height: 5px; }
+  .nursery-tabs-wrap::-webkit-scrollbar-thumb { background: var(--border-gold); border-radius: 10px; }
+  .nursery-tab {
+    flex: 0 0 auto; width: 66px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: none; border: none; cursor: pointer; padding: 2px; position: relative;
+  }
+  .nursery-tab .tab-circle {
+    width: 56px; height: 56px; border-radius: 50%; background: rgba(0,0,0,0.5);
+    border: 2px solid rgba(212, 163, 89, 0.35); display: flex; align-items: center; justify-content: center;
+    overflow: hidden; transition: all 0.25s ease;
+  }
+  .nursery-tab .tab-circle img { width: 78%; height: 78%; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6)); }
+  .nursery-tab.active .tab-circle { border-color: var(--gold-bright); box-shadow: 0 0 14px var(--gold-glow); transform: scale(1.08); }
+  .nursery-tab:hover .tab-circle { border-color: var(--border-gold); }
+  .nursery-tab .tab-label { font-family: 'Marhey', cursive; font-size: 10px; color: var(--text-muted); max-width: 66px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nursery-tab.active .tab-label { color: var(--gold-bright); }
+  .nursery-tab .tab-stage-dot {
+    position: absolute; top: 0; right: 6px; width: 10px; height: 10px; border-radius: 50%;
+    border: 1.5px solid var(--parchment-bg);
+  }
+  .nursery-tab .tab-stage-dot.dot-egg { background: var(--text-muted); }
+  .nursery-tab .tab-stage-dot.dot-baby { background: var(--rarity-uncommon); }
+  .nursery-tab .tab-stage-dot.dot-teen { background: var(--magical-flame); }
+  .nursery-tab .tab-stage-dot.dot-adult { background: var(--rarity-rare); }
+  .nursery-tab-empty-hint { font-family: 'Marhey', cursive; font-size: 12.5px; color: var(--text-muted); text-align: center; padding: 10px 4px; }
+
+  .nursery-detail-panel {
+    margin-top: 6px; background: rgba(0,0,0,0.4); border: 1.5px solid var(--border-gold);
+    border-radius: 18px; padding: 18px; animation: modalPop 0.35s ease;
+  }
+  .nursery-detail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .nursery-detail-head h4 { font-family: 'Aref Ruqaa', serif; font-size: 20px; color: var(--gold-bright); }
+  .nursery-name-input {
+    background: rgba(0,0,0,0.6); border: 1.5px solid var(--border-gold); color: var(--gold-bright);
+    padding: 8px 14px; border-radius: 10px; text-align: center; font-size: 14px; outline: none; width: 180px;
+    font-family: 'Aref Ruqaa', serif; margin: 6px auto 0; display: block;
+  }
+
   /* Level-up flash */
   .medallion.level-flash { animation: levelFlashAnim 0.9s ease; }
   @keyframes levelFlashAnim {
@@ -616,14 +660,17 @@ document.addEventListener('click', () => {
         owned: parsed.owned || [],
         equipped: parsed.equipped || null,
         level1Completed: !!parsed.level1Completed,
-        dragonCounts: parsed.dragonCounts || {}
+        dragonCounts: parsed.dragonCounts || {},
+        nurseryDragons: Array.isArray(parsed.nurseryDragons) ? parsed.nurseryDragons : [],
+        activeNurseryId: parsed.activeNurseryId || null
       };
     } catch(e) {
       return {
         warmth: 0, xp: 0, galleons: 0, introSeen: false, hatched: false,
         speciesId: getRandomElement(SPECIES_DATABASE).id,
         dragonName: '', stage: 'baby', bond: 0, unlockedSpecies: [], owned: [], equipped: null,
-        level1Completed: false, dragonCounts: {}
+        level1Completed: false, dragonCounts: {},
+        nurseryDragons: [], activeNurseryId: null
       };
     }
   }
@@ -673,6 +720,41 @@ document.addEventListener('click', () => {
   }
 
   function getLevel() { return Math.floor(state.xp / XP_LEVEL_STEP) + 1; }
+
+  /* ===== Nursery (Level 2) helpers: each purchased egg is raised individually ===== */
+  function getNurseryStage(nd) {
+    if (!nd.hatched) return 'egg';
+    if (nd.bond >= 100) return 'adult';
+    if (nd.bond >= 50) return 'teen';
+    return 'baby';
+  }
+
+  function getNurseryEggImage(nd) {
+    if (nd.warmth >= MAX_EGG_WARMTH) return EGG_STAGES_IMAGES[2];
+    if (nd.warmth >= 4) return EGG_STAGES_IMAGES[1];
+    return EGG_STAGES_IMAGES[0];
+  }
+
+  function getNurseryImage(nd) {
+    const sp = SPECIES_DATABASE.find(s => s.id === nd.speciesId);
+    const stage = getNurseryStage(nd);
+    if (stage === 'egg') return getNurseryEggImage(nd);
+    return sp.images[stage];
+  }
+
+  function getNurseryLabel(nd) {
+    if (!nd.hatched) return 'بيضة غامضة';
+    return nd.name || SPECIES_DATABASE.find(s => s.id === nd.speciesId).name;
+  }
+
+  function createNurseryEgg() {
+    const sp = pickRandomDragonByRarity();
+    return { id: 'n' + Date.now() + Math.floor(Math.random() * 1000), speciesId: sp.id, name: '', warmth: 0, bond: 0, hatched: false };
+  }
+
+  function getActiveNurseryDragon() {
+    return state.nurseryDragons.find(nd => nd.id === state.activeNurseryId) || null;
+  }
 
   const coinVal = document.getElementById('coinVal');
   const xpVal = document.getElementById('xpVal');
@@ -1153,71 +1235,76 @@ document.addEventListener('click', () => {
     const totalDragons = Object.values(state.dragonCounts).reduce((a, b) => a + b, 0);
     const canAfford = state.galleons >= MYSTERY_EGG_PRICE;
 
+    // تأكيد إن فيه تنين نشط محدد لو موجودة بيوض/تنانين بالفعل
+    if (state.nurseryDragons.length && !getActiveNurseryDragon()) {
+      state.activeNurseryId = state.nurseryDragons[state.nurseryDragons.length - 1].id;
+    }
+
+    const tabsHTML = state.nurseryDragons.length ? state.nurseryDragons.map(nd => {
+      const stage = getNurseryStage(nd);
+      const isActive = nd.id === state.activeNurseryId;
+      return `
+        <button class="nursery-tab ${isActive ? 'active' : ''}" data-id="${nd.id}">
+          <span class="tab-circle">
+            <img src="${getNurseryImage(nd)}" alt="${getNurseryLabel(nd)}">
+          </span>
+          <span class="tab-stage-dot dot-${stage}"></span>
+          <span class="tab-label">${getNurseryLabel(nd)}</span>
+        </button>
+      `;
+    }).join('') : `<div class="nursery-tab-empty-hint">لسه معندكيش بيوض بتربّيها هنا... اشتري أول بيضة غامضة تبدأ بيها! 🥚</div>`;
+
     screenView.innerHTML = `
       <div class="card-kicker">LEVEL 2 &middot; UNLOCKED</div>
       <h1 class="card-title">المستوى الثاني: وادي أشتار</h1>
       <div class="card-divider"></div>
       <p class="narrative-p">
         تهانينا! تنينك الأول أصبح بالغًا، وقادكِ نموه إلى وادي أشتار، موطن حضّانة سرية مليئة ببيوض غامضة لسلالات التنانين الست.
-        كل بيضة تخفي مفاجأة قد تكون سلالة شائعة، أو نادرة جدًا تستحق الفخر! اشتري بيضة، وخلي الحظ يقرر مين هيخرج منها.
+        كل بيضة تخفي سلالة مجهولة لحد ما تفقّسيها وتربّيها بنفسك خطوة بخطوة!
       </p>
 
       <div class="egg-shop-box">
         <img src="${MYSTERY_EGG_IMAGE}" alt="بيضة غامضة">
         <div class="egg-shop-info">
-          <h4>بيضة غامضة</h4>
-          <p>فرصة الحصول على سلالة نادرة موجودة، لكنها ضئيلة... جرّبي حظك!</p>
+          <h4>بيضة غامضة جديدة</h4>
+          <p>اشتري بيضة وابدأي تربّيها لحد ما تفقس وتكبر لسلالتها الكاملة!</p>
         </div>
         <button class="btn-action" id="buyEggBtn" ${(!canAfford || isInteracting) ? 'disabled' : ''}>
           شراء (${MYSTERY_EGG_PRICE} غاليون)
         </button>
       </div>
 
-      <div id="hatchRevealBox">${lastHatchResult ? renderHatchRevealHTML(lastHatchResult) : ''}</div>
+      <div class="nursery-tabs-section">
+        <div class="nursery-tabs-label">بيوضك وتنانينك في وادي أشتار:</div>
+        <div class="nursery-tabs-wrap" id="nurseryTabsWrap">${tabsHTML}</div>
+      </div>
+
+      <div id="nurseryDetailPanel"></div>
 
       <div class="mini-collection-strip">
         <div class="strip-head">
           <span>ملخص الموسوعة</span>
           <b>${totalUnique} / ${SPECIES_DATABASE.length} سلالة &middot; ${totalDragons} تنين</b>
         </div>
-        <div class="archive-grid">
-          ${SPECIES_DATABASE.map(sp => {
-            const count = state.dragonCounts[sp.id] || 0;
-            const isDiscovered = count > 0;
-            return `
-              <div class="archive-card ${isDiscovered ? 'rarity-' + sp.rarity : 'locked'}">
-                ${isDiscovered ? `<span class="count-badge">×${count}</span>` : ''}
-                <img src="${sp.images.baby}" alt="${sp.name}">
-                <div class="label">${isDiscovered ? sp.name : 'سلالة غامضة'}</div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-        <div style="text-align:center; margin-top:16px;">
+        <div style="text-align:center; margin-top:10px;">
           <button class="btn-action" id="goCollectionBtn" style="margin:0 auto;">فتح الموسوعة الكاملة 📖</button>
         </div>
       </div>
     `;
 
-    const buyEggBtn = document.getElementById('buyEggBtn');
-    buyEggBtn.addEventListener('click', handleBuyMysteryEgg);
+    document.getElementById('buyEggBtn').addEventListener('click', handleBuyMysteryEgg);
     document.getElementById('goCollectionBtn').addEventListener('click', () => navigateTo('collection'));
-  }
 
-  function renderHatchRevealHTML(result) {
-    const { sp, isNew, count } = result;
-    const isRare = sp.rarity === 'rare';
-    return `
-      <div class="hatch-reveal-box ${isRare ? 'rare-pull' : ''}">
-        <div class="${isRare ? 'sparkle-burst' : ''}">
-          <img src="${sp.images.baby}" alt="${sp.name}">
-        </div>
-        <span class="rarity-badge ${sp.rarity}">${RARITY_META[sp.rarity].label}</span>
-        <h4>${sp.name}</h4>
-        <div class="hatch-sub">${sp.english}</div>
-        <div class="hatch-sub">${isNew ? '🎉 سلالة جديدة أُضيفت لموسوعتك!' : `لديكِ الآن ${count} من هذه السلالة`}</div>
-      </div>
-    `;
+    screenView.querySelectorAll('.nursery-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (isInteracting) return;
+        state.activeNurseryId = tab.dataset.id;
+        saveState();
+        renderChapter2Screen();
+      });
+    });
+
+    renderNurseryDetailPanel();
   }
 
   async function handleBuyMysteryEgg() {
@@ -1229,22 +1316,181 @@ document.addEventListener('click', () => {
     state.galleons -= MYSTERY_EGG_PRICE;
     saveState(); updateLedgerUI();
 
-    if (buyEggBtn) { buyEggBtn.disabled = true; buyEggBtn.textContent = 'جاري الفقس...'; }
+    if (buyEggBtn) { buyEggBtn.disabled = true; buyEggBtn.textContent = 'جاري التحضير...'; }
     if (shopImg) shopImg.classList.add('egg-shake');
 
-    await sleep(1300);
+    await sleep(900);
 
-    const sp = pickRandomDragonByRarity();
+    const newEgg = createNurseryEgg();
+    state.nurseryDragons.push(newEgg);
+    state.activeNurseryId = newEgg.id;
+    saveState();
+
+    isInteracting = false;
+    if (activeScreen === 'chapter2') renderChapter2Screen();
+  }
+
+  /* ============ Nursery Detail Panel: raise the selected egg/dragon ============ */
+  function renderNurseryDetailPanel() {
+    const panel = document.getElementById('nurseryDetailPanel');
+    if (!panel) return;
+    const nd = getActiveNurseryDragon();
+    if (!nd) { panel.innerHTML = ''; return; }
+
+    const stage = getNurseryStage(nd);
+
+    if (stage === 'egg') {
+      renderNurseryEggPanel(panel, nd);
+    } else {
+      renderNurseryDragonPanel(panel, nd, stage);
+    }
+  }
+
+  function renderNurseryEggPanel(panel, nd) {
+    const pct = Math.round((nd.warmth / MAX_EGG_WARMTH) * 100);
+    panel.innerHTML = `
+      <div class="nursery-detail-panel">
+        <div class="nursery-detail-head"><h4>بيضة غامضة قيد التربية</h4></div>
+        <div class="dragon-display-frame" style="height:180px;">
+          <img src="${getNurseryEggImage(nd)}" alt="egg" class="main-dragon-img" id="ndEggImg">
+        </div>
+        <div class="meter-box">
+          <div class="meter-head"><span>مستوى الدفء</span><span id="ndWarmthPct">${pct}%</span></div>
+          <div class="meter-track"><div class="meter-fill" id="ndWarmthFill" style="width:${pct}%"></div></div>
+        </div>
+        <div class="action-grid">
+          <button class="btn-action" id="ndWarmBtn">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 23c6.075 0 11-4.925 11-11S12 2 12 2 1 6.925 1 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+            تدفئة
+          </button>
+        </div>
+        <div class="status-hint" id="ndHint">${HINTS_TEXT[Math.min(nd.warmth, HINTS_TEXT.length-1)]}</div>
+      </div>
+    `;
+
+    document.getElementById('ndWarmBtn').addEventListener('click', () => {
+      if (isInteracting || nd.warmth >= MAX_EGG_WARMTH) return;
+      nd.warmth++;
+      addReward(3, 5);
+      saveState();
+
+      const eggImgElem = document.getElementById('ndEggImg');
+      updateImageWithAnimation(eggImgElem, getNurseryEggImage(nd));
+      const p = Math.round((nd.warmth / MAX_EGG_WARMTH) * 100);
+      document.getElementById('ndWarmthFill').style.width = p + '%';
+      document.getElementById('ndWarmthPct').textContent = p + '%';
+      document.getElementById('ndHint').textContent = HINTS_TEXT[Math.min(nd.warmth, HINTS_TEXT.length-1)];
+
+      // تحديث صورة التاب المصغّر
+      const tabImg = document.querySelector(`.nursery-tab[data-id="${nd.id}"] .tab-circle img`);
+      if (tabImg) tabImg.src = getNurseryEggImage(nd);
+
+      if (nd.warmth >= MAX_EGG_WARMTH) {
+        setTimeout(() => handleNurseryHatch(nd), 900);
+      }
+    });
+  }
+
+  function handleNurseryHatch(nd) {
+    nd.hatched = true;
+    const sp = SPECIES_DATABASE.find(s => s.id === nd.speciesId);
     const prevCount = state.dragonCounts[sp.id] || 0;
     const isNew = prevCount === 0;
     state.dragonCounts[sp.id] = prevCount + 1;
     if (!state.unlockedSpecies.includes(sp.id)) state.unlockedSpecies.push(sp.id);
-    lastHatchResult = { sp, isNew, count: state.dragonCounts[sp.id] };
-
     saveState();
-    addReward(isNew ? 15 : 5, 0);
-    isInteracting = false;
+    addReward(isNew ? 15 : 5, 10);
     if (activeScreen === 'chapter2') renderChapter2Screen();
+  }
+
+  function renderNurseryDragonPanel(panel, nd, stage) {
+    const sp = SPECIES_DATABASE.find(s => s.id === nd.speciesId);
+    const isFullyGrown = stage === 'adult';
+    const stageTitles = { baby: 'تنين صغير (BABY)', teen: 'تنين يافع (TEEN)', adult: 'تنين بالغ (ADULT)' };
+    const isRare = sp.rarity === 'rare';
+
+    panel.innerHTML = `
+      <div class="nursery-detail-panel ${!nd.name ? 'just-hatched' : ''}">
+        <div class="nursery-detail-head">
+          <h4>${nd.name || sp.name}</h4>
+          <span class="rarity-badge ${sp.rarity}">${RARITY_META[sp.rarity].label}</span>
+        </div>
+        <div class="card-kicker" id="ndStageKicker" style="text-align:center; margin-bottom:6px;">${stageTitles[stage]}</div>
+        <div class="dragon-display-frame ${isRare && !nd.name ? 'sparkle-burst' : ''}" style="height:190px;">
+          <img src="${sp.images[stage]}" alt="${sp.name}" class="main-dragon-img" id="ndDragonImg">
+        </div>
+        <p style="text-align:center; font-size:13px; color:var(--text-muted); font-weight:300; margin-bottom:10px;">${sp.desc}</p>
+        ${!nd.name ? `
+          <p style="text-align:center; font-size:13px; color:var(--gold-bright); font-family:'Marhey', cursive;">🎉 اختاري اسمًا لتنينك الجديد:</p>
+          <input type="text" id="ndNameInput" class="nursery-name-input" maxlength="18" placeholder="اسم التنين...">
+          <div style="text-align:center; margin-top:10px;">
+            <button class="btn-action" id="ndSaveNameBtn" style="margin:0 auto;">تأكيد الاسم ✨</button>
+          </div>
+        ` : `
+          <div class="meter-box">
+            <div class="meter-head"><span>نسبة النمو</span><span id="ndBondPct">${nd.bond}%</span></div>
+            <div class="meter-track"><div class="meter-fill bond" id="ndBondFill" style="width:${nd.bond}%"></div></div>
+          </div>
+          ${isFullyGrown ? `
+            <div class="status-hint">🌟 وصل تنينك للنمو الكامل! ممكن تفتحي بيضة جديدة أو تتنقلي بين تنانينك من الأزرار اللي فوق.</div>
+          ` : `
+            <div class="action-grid" id="ndCareActions">
+              <button class="btn-action" data-type="pet"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>ملاطفة</button>
+              <button class="btn-action" data-type="play"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>لعب</button>
+              <button class="btn-action" data-type="feed"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.46 3.9 3.45 4.38l-.95 7.62h3l-.95-7.62C9.54 12.9 11 11.12 11 9zm7-7v12h2V2h-2z"/></svg>إطعام</button>
+            </div>
+            <div class="status-hint" id="ndCareHint">اعتني بتنينك ليكبر شوية شوية 💫</div>
+          `}
+        `}
+      </div>
+    `;
+
+    const nameBtn = document.getElementById('ndSaveNameBtn');
+    if (nameBtn) {
+      nameBtn.addEventListener('click', () => {
+        const val = document.getElementById('ndNameInput').value.trim();
+        nd.name = val || sp.name;
+        saveState();
+        renderChapter2Screen();
+      });
+    }
+
+    const careBtns = panel.querySelectorAll('#ndCareActions .btn-action');
+    careBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isInteracting || nd.bond >= 100) return;
+        nd.bond = Math.min(100, nd.bond + 10);
+        addReward(2, 3);
+        saveState();
+
+        const newStage = getNurseryStage(nd);
+        const bondFill = document.getElementById('ndBondFill');
+        const bondPct = document.getElementById('ndBondPct');
+        if (bondFill) bondFill.style.width = nd.bond + '%';
+        if (bondPct) bondPct.textContent = nd.bond + '%';
+
+        const tabImg = document.querySelector(`.nursery-tab[data-id="${nd.id}"] .tab-circle img`);
+        if (tabImg) tabImg.src = getNurseryImage(nd);
+        const tabDot = document.querySelector(`.nursery-tab[data-id="${nd.id}"] .tab-stage-dot`);
+        if (tabDot) tabDot.className = `tab-stage-dot dot-${newStage}`;
+
+        if (nd.bond >= 100) {
+          renderNurseryDragonPanel(panel, nd, 'adult');
+          return;
+        }
+
+        const dragonImg = document.getElementById('ndDragonImg');
+        if (dragonImg) {
+          dragonImg.classList.add('action-anim');
+          setTimeout(() => dragonImg.classList.remove('action-anim'), 300);
+        }
+        const careHint = document.getElementById('ndCareHint');
+        if (careHint) {
+          const msgs = { feed: 'استمتع بالوجبة! 🍖', play: 'لعب بحماس! 🎾', pet: 'شعر بالود والدفء 💫' };
+          careHint.textContent = msgs[btn.dataset.type] || '';
+        }
+      });
+    });
   }
 
   bottomNav.addEventListener('click', (e) => {
